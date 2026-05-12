@@ -120,11 +120,17 @@
     </div>
 
     <div class="grid mb-4">
-      <div class="col-12">
+      <div class="col-12 xl:col-6">
         <app-package-treemap
           [data]="facade.packageMetrics()"
           (packageSelected)="onPackageSelected($event)"
         ></app-package-treemap>
+      </div>
+      <div class="col-12 xl:col-6">
+        <app-co-change-heatmap
+          [matrix]="facade.coChangeMatrix()"
+          (cellSelected)="onCoChangeCellSelected($event)"
+        ></app-co-change-heatmap>
       </div>
     </div>
 

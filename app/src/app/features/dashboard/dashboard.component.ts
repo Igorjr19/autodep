@@ -11,6 +11,8 @@ import { DependencyGraphComponent } from './components/dependency-graph/dependen
 import { CouplingRankingComponent } from './components/coupling-ranking/coupling-ranking.component';
 import { MetricsPanelComponent } from './components/metrics-panel/metrics-panel.component';
 import { PackageTreemapComponent } from './components/package-treemap/package-treemap.component';
+import { CoChangeHeatmapComponent } from './components/co-change-heatmap/co-change-heatmap.component';
+import { CoChangeCell } from '../../core/models/CoChangeMatrix';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,6 +27,7 @@ import { PackageTreemapComponent } from './components/package-treemap/package-tr
     CouplingRankingComponent,
     MetricsPanelComponent,
     PackageTreemapComponent,
+    CoChangeHeatmapComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
@@ -48,6 +51,12 @@ export class DashboardComponent {
 
   onPackageSelected(pkg: string): void {
     this.facade.setPackageFilter(pkg);
+  }
+
+  onCoChangeCellSelected(cell: CoChangeCell): void {
+    if (cell.rowPackage === cell.colPackage) {
+      this.facade.setPackageFilter(cell.rowPackage);
+    }
   }
 
   exportJson(): void {

@@ -1,0 +1,22 @@
+<div class="heatmap-container">
+  <div class="heatmap-header">
+    <h3 class="m-0 text-lg font-medium">
+      <i class="pi pi-table mr-2"></i>Co-mudança entre pacotes
+    </h3>
+    <span class="text-sm text-500">cor = intensidade · hover para detalhes</span>
+  </div>
+  <div #host class="heatmap-host"></div>
+  <div *ngIf="!hasData()" class="heatmap-empty">
+    <i class="pi pi-info-circle mr-2"></i>{{ noDataText }}
+  </div>
+  <div
+    *ngIf="tooltip().visible"
+    class="heatmap-tooltip"
+    [style.left.px]="tooltip().x"
+    [style.top.px]="tooltip().y"
+  >
+    <div class="font-semibold">{{ tooltip().rowPackage }} ↔ {{ tooltip().colPackage }}</div>
+    <div class="text-sm">Peso total: {{ tooltip().totalWeight }}</div>
+    <div class="text-sm">Relações: {{ tooltip().edgeCount }}</div>
+  </div>
+</div>
