@@ -3,6 +3,7 @@ import { AnalysisResult } from '../models/AnalysisResult';
 import { NodeInfo } from '../models/NodeInfo';
 import { RelationCategory } from '../models/types';
 import { ANALYSIS_SERVICE_TOKEN } from '../services/AnalysisPort';
+import { aggregatePackageMetrics } from '../aggregations';
 
 @Injectable({ providedIn: 'root' })
 export class AnalysisFacade {
@@ -66,6 +67,11 @@ export class AnalysisFacade {
     return data.edges.filter(
       (e) => cats.has(e.category) && ids.has(e.source) && ids.has(e.target),
     );
+  });
+
+  readonly packageMetrics = computed(() => {
+    const data = this._analysisData();
+    return data ? aggregatePackageMetrics(data.nodes) : [];
   });
 
   async selectProjectFolder(): Promise<void> {

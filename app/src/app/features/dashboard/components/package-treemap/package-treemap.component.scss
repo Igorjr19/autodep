@@ -1,0 +1,48 @@
+.treemap-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 560px;
+  background: var(--surface-card, #ffffff);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  padding: 1rem;
+}
+
+.treemap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.treemap-host {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.treemap-tooltip {
+  position: absolute;
+  background: rgba(33, 33, 33, 0.92);
+  color: #ffffff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  pointer-events: none;
+  font-size: 0.85rem;
+  z-index: 10;
+  max-width: 240px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+::ng-deep .treemap-svg .cell rect {
+  transition: opacity 0.15s ease;
+}
+
+::ng-deep .treemap-svg .cell:hover rect {
+  opacity: 0.85;
+  stroke: #1565c0;
+  stroke-width: 2;
+}

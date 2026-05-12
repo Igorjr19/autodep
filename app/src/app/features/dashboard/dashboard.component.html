@@ -119,6 +119,15 @@
       </div>
     </div>
 
+    <div class="grid mb-4">
+      <div class="col-12">
+        <app-package-treemap
+          [data]="facade.packageMetrics()"
+          (packageSelected)="onPackageSelected($event)"
+        ></app-package-treemap>
+      </div>
+    </div>
+
     <div class="grid">
       <div class="col-12">
         <app-class-table [nodes]="data.nodes"></app-class-table>

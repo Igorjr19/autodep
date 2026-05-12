@@ -10,6 +10,7 @@ import { ClassTableComponent } from './components/class-table/class-table.compon
 import { DependencyGraphComponent } from './components/dependency-graph/dependency-graph.component';
 import { CouplingRankingComponent } from './components/coupling-ranking/coupling-ranking.component';
 import { MetricsPanelComponent } from './components/metrics-panel/metrics-panel.component';
+import { PackageTreemapComponent } from './components/package-treemap/package-treemap.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,6 +24,7 @@ import { MetricsPanelComponent } from './components/metrics-panel/metrics-panel.
     DependencyGraphComponent,
     CouplingRankingComponent,
     MetricsPanelComponent,
+    PackageTreemapComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
@@ -42,6 +44,10 @@ export class DashboardComponent {
   onMinCboChange(event: Event): void {
     const value = parseInt((event.target as HTMLInputElement).value, 10);
     this.facade.setMinCboFilter(isNaN(value) ? 0 : value);
+  }
+
+  onPackageSelected(pkg: string): void {
+    this.facade.setPackageFilter(pkg);
   }
 
   exportJson(): void {

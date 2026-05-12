@@ -1,0 +1,22 @@
+<div class="treemap-container">
+  <div class="treemap-header">
+    <h3 class="m-0 text-lg font-medium">
+      <i class="pi pi-th-large mr-2"></i>Pacotes por LOC
+    </h3>
+    <span class="text-sm text-500">cor = CBO médio · clique para filtrar</span>
+  </div>
+  <div #host class="treemap-host"></div>
+  <div
+    *ngIf="tooltip().visible && tooltip().pkg as p"
+    class="treemap-tooltip"
+    [style.left.px]="tooltip().x"
+    [style.top.px]="tooltip().y"
+  >
+    <div class="font-semibold">{{ p.name }}</div>
+    <div class="text-sm">
+      {{ p.classCount }} classes · LOC {{ p.totalLoc }}
+    </div>
+    <div class="text-sm">CBO médio: {{ p.meanCbo }}</div>
+    <div class="text-sm">LCOM médio: {{ p.meanLcom }}</div>
+  </div>
+</div>
