@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NodeInfo } from '../../../../core/models/NodeInfo';
 import { TableModule } from 'primeng/table';
@@ -23,10 +23,17 @@ const TYPE_LABELS: Record<NodeType, string> = {
 })
 export class ClassTableComponent {
   nodes = input.required<NodeInfo[]>();
+  selectedNodeId = input<string | null>(null);
+  nodeSelected = output<NodeInfo>();
+
   protected readonly defs = METRIC_DEFINITIONS;
 
   protected typeLabel(type: NodeType): string {
     return TYPE_LABELS[type] ?? type;
+  }
+
+  protected onRowClick(node: NodeInfo): void {
+    this.nodeSelected.emit(node);
   }
 
   getCboSeverity(cbo: number): 'success' | 'warn' | 'danger' | 'info' {

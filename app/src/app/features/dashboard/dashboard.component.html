@@ -112,6 +112,7 @@
           [edges]="data.edges"
           [activeCategories]="facade.activeCategories()"
           [visibleNodeIds]="facade.visibleNodeIds()"
+          [selectedNode]="facade.selectedNode()"
           (nodeSelected)="facade.selectNode($event)"
           (categoryToggled)="onCategoryToggled($event)"
         ></app-force-graph>
@@ -150,7 +151,11 @@
 
     <div class="grid">
       <div class="col-12">
-        <app-class-table [nodes]="data.nodes"></app-class-table>
+        <app-class-table
+          [nodes]="data.nodes"
+          [selectedNodeId]="facade.selectedNode()?.id ?? null"
+          (nodeSelected)="onClassTableSelect($event)"
+        ></app-class-table>
       </div>
     </div>
   </main>

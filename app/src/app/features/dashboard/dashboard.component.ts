@@ -51,6 +51,13 @@ export class DashboardComponent {
     this.facade.setPackageFilter(pkg);
   }
 
+  onClassTableSelect(node: import('../../core/models/NodeInfo').NodeInfo): void {
+    this.facade.selectNode(node);
+    document
+      .querySelector('app-force-graph')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   onCoChangeCellSelected(cell: CoChangeCell): void {
     if (cell.rowPackage === cell.colPackage) {
       this.facade.setPackageFilter(cell.rowPackage);

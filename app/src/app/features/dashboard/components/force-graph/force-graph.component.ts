@@ -25,7 +25,7 @@ import {
 } from 'd3-force';
 import { quadtree, Quadtree } from 'd3-quadtree';
 import { select } from 'd3-selection';
-import { zoom, zoomIdentity, ZoomTransform } from 'd3-zoom';
+import { zoom, zoomIdentity, ZoomBehavior, ZoomTransform } from 'd3-zoom';
 import { NodeInfo } from '../../../../core/models/NodeInfo';
 import { EdgeInfo } from '../../../../core/models/EdgeInfo';
 import { RelationCategory, NodeType } from '../../../../core/models/types';
@@ -118,6 +118,7 @@ export class ForceGraphComponent implements OnDestroy {
   edges = input.required<readonly EdgeInfo[]>();
   activeCategories = input.required<Set<RelationCategory>>();
   visibleNodeIds = input.required<Set<string>>();
+  selectedNode = input<NodeInfo | null>(null);
 
   nodeSelected = output<NodeInfo | null>();
   categoryToggled = output<RelationCategory>();
@@ -167,6 +168,7 @@ export class ForceGraphComponent implements OnDestroy {
   private simNodes: SimNode[] = [];
   private simLinks: SimLink[] = [];
   private spatialIndex: Quadtree<SimNode> | null = null;
+  private zoomBehavior: ZoomBehavior<HTMLCanvasElement, unknown> | null = null;
   private lens: FisheyeLens = circularFisheye()
     .radius(FISHEYE_RADIUS)
     .distortion(FISHEYE_DISTORTION);
@@ -177,8 +179,8 @@ export class ForceGraphComponent implements OnDestroy {
   private dpr = 1;
   private drawRequested = false;
   private lastDatasetKey = '';
-  private selectedNodeId: string | null = null;
   private neighborIds: Set<string> = new Set();
+  private internalSelection = false;
   private cleanupHandlers: Array<() => void> = [];
 
   constructor() {
@@ -194,7 +196,6 @@ export class ForceGraphComponent implements OnDestroy {
       const key = this.computeDatasetKey(nodes, edges);
       if (key !== this.lastDatasetKey && this.dimensions.width > 0) {
         this.lastDatasetKey = key;
-        this.clearSelection();
         this.rebuildSimulation(nodes, edges);
       }
     });
@@ -202,6 +203,16 @@ export class ForceGraphComponent implements OnDestroy {
     effect(() => {
       this.visibleNodeIds();
       this.activeCategories();
+      this.requestDraw();
+    });
+
+    effect(() => {
+      const selectedId = this.selectedNode()?.id ?? null;
+      this.neighborIds = this.computeNeighbors(selectedId);
+      if (selectedId !== null && !this.internalSelection && this.simulation !== null) {
+        this.centerOnNode(selectedId);
+      }
+      this.internalSelection = false;
       this.requestDraw();
     });
   }
@@ -233,14 +244,14 @@ export class ForceGraphComponent implements OnDestroy {
   private setupInteractions(): void {
     const canvas = this.canvasRef().nativeElement;
 
-    const zoomBehavior = zoom<HTMLCanvasElement, unknown>()
+    this.zoomBehavior = zoom<HTMLCanvasElement, unknown>()
       .scaleExtent([0.1, 8])
       .filter((event) => !event.shiftKey)
       .on('zoom', (event) => {
         this.transform = event.transform;
         this.requestDraw();
       });
-    select(canvas).call(zoomBehavior);
+    select(canvas).call(this.zoomBehavior);
 
     const onMove = (event: MouseEvent) => this.handleMouseMove(event);
     const onLeave = () => this.handleMouseLeave();
@@ -391,20 +402,24 @@ export class ForceGraphComponent implements OnDestroy {
       .addAll(this.simNodes);
   }
 
-  private clearSelection(): void {
-    this.selectedNodeId = null;
-    this.neighborIds = new Set();
-  }
-
-  private updateNeighbors(): void {
-    this.neighborIds = new Set();
-    if (this.selectedNodeId === null) return;
+  private computeNeighbors(selectedId: string | null): Set<string> {
+    const result = new Set<string>();
+    if (selectedId === null) return result;
     for (const link of this.simLinks) {
       const sid = (link.source as SimNode).id;
       const tid = (link.target as SimNode).id;
-      if (sid === this.selectedNodeId) this.neighborIds.add(tid);
-      else if (tid === this.selectedNodeId) this.neighborIds.add(sid);
+      if (sid === selectedId) result.add(tid);
+      else if (tid === selectedId) result.add(sid);
     }
+    return result;
+  }
+
+  private centerOnNode(nodeId: string): void {
+    const node = this.simNodes.find((n) => n.id === nodeId);
+    if (!node || node.x === undefined || node.y === undefined) return;
+    if (this.zoomBehavior === null) return;
+    const canvas = select(this.canvasRef().nativeElement);
+    canvas.call(this.zoomBehavior.translateTo, node.x, node.y);
   }
 
   private handleMouseMove(event: MouseEvent): void {
@@ -444,10 +459,8 @@ export class ForceGraphComponent implements OnDestroy {
     const screenY = event.clientY - rect.top;
     const [wx, wy] = this.screenToWorld(screenX, screenY);
     const hit = this.findNearestNode(wx, wy);
-    this.selectedNodeId = hit?.id ?? null;
-    this.updateNeighbors();
+    this.internalSelection = true;
     this.nodeSelected.emit(hit?.info ?? null);
-    this.requestDraw();
   }
 
   private screenToWorld(sx: number, sy: number): [number, number] {
@@ -491,10 +504,11 @@ export class ForceGraphComponent implements OnDestroy {
     const visibleIds = this.visibleNodeIds();
     const cats = this.activeCategories();
     const useFisheye = this.fisheyeEnabled() && this.mouse !== null;
-    const hasSelection = this.selectedNodeId !== null;
+    const selectedId = this.selectedNode()?.id ?? null;
+    const hasSelection = selectedId !== null;
 
-    this.drawEdges(ctx, visibleIds, cats, useFisheye, hasSelection);
-    this.drawNodes(ctx, visibleIds, useFisheye, hasSelection);
+    this.drawEdges(ctx, visibleIds, cats, useFisheye, hasSelection, selectedId);
+    this.drawNodes(ctx, visibleIds, useFisheye, hasSelection, selectedId);
 
     ctx.restore();
 
@@ -507,6 +521,7 @@ export class ForceGraphComponent implements OnDestroy {
     cats: Set<RelationCategory>,
     useFisheye: boolean,
     hasSelection: boolean,
+    selectedId: string | null,
   ): void {
     const buckets: Record<RelationCategory, { dim: SimLink[]; bright: SimLink[] }> = {
       STRUCTURAL: { dim: [], bright: [] },
@@ -521,8 +536,7 @@ export class ForceGraphComponent implements OnDestroy {
       if (!cats.has(link.info.category)) continue;
 
       const isHighlighted =
-        hasSelection &&
-        (src.id === this.selectedNodeId || tgt.id === this.selectedNodeId);
+        hasSelection && (src.id === selectedId || tgt.id === selectedId);
       buckets[link.info.category][isHighlighted ? 'bright' : 'dim'].push(link);
     }
 
@@ -577,6 +591,7 @@ export class ForceGraphComponent implements OnDestroy {
     visibleIds: Set<string>,
     useFisheye: boolean,
     hasSelection: boolean,
+    selectedId: string | null,
   ): void {
     const dimNodes: SimNode[] = [];
     const brightNodes: SimNode[] = [];
@@ -585,19 +600,17 @@ export class ForceGraphComponent implements OnDestroy {
       if (!visibleIds.has(node.id)) continue;
       if (node.x === undefined || node.y === undefined) continue;
       const isFocus =
-        !hasSelection ||
-        node.id === this.selectedNodeId ||
-        this.neighborIds.has(node.id);
+        !hasSelection || node.id === selectedId || this.neighborIds.has(node.id);
       (isFocus ? brightNodes : dimNodes).push(node);
     }
 
     if (dimNodes.length > 0) {
       ctx.globalAlpha = NODE_OPACITY_DIM;
-      this.paintNodes(ctx, dimNodes, useFisheye, false);
+      this.paintNodes(ctx, dimNodes, useFisheye, false, selectedId);
     }
 
     ctx.globalAlpha = 1;
-    this.paintNodes(ctx, brightNodes, useFisheye, true);
+    this.paintNodes(ctx, brightNodes, useFisheye, true, selectedId);
   }
 
   private paintNodes(
@@ -605,6 +618,7 @@ export class ForceGraphComponent implements OnDestroy {
     nodes: SimNode[],
     useFisheye: boolean,
     canBeSelected: boolean,
+    selectedId: string | null,
   ): void {
     // Pré-calcula posições e raios (usados duas vezes: halo + nó).
     const projections: Array<{ node: SimNode; x: number; y: number; r: number }> = [];
@@ -631,7 +645,7 @@ export class ForceGraphComponent implements OnDestroy {
     // Camada 2 — preenchimento colorido + contorno.
     for (const p of projections) {
       ctx.fillStyle = cboColorScale(p.node.info.metrics.cbo);
-      const isSelected = canBeSelected && p.node.id === this.selectedNodeId;
+      const isSelected = canBeSelected && p.node.id === selectedId;
       ctx.strokeStyle = isSelected ? '#1565c0' : '#9e9e9e';
       ctx.lineWidth = isSelected ? 2 : 1;
       drawNodeShape(ctx, p.node.info.type, p.x, p.y, p.r, true);

@@ -65,7 +65,12 @@
     </ng-template>
 
     <ng-template pTemplate="body" let-node>
-      <tr>
+      <tr
+        class="clickable-row"
+        [class.is-selected]="node.id === selectedNodeId()"
+        (click)="onRowClick(node)"
+        [title]="'Clique para destacar ' + node.simpleName + ' no grafo'"
+      >
         <td class="font-medium text-800">{{ node.simpleName }}</td>
         <td class="text-500 text-sm">{{ node.packageName || '(root)' }}</td>
         <td>

@@ -1,0 +1,22 @@
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.clickable-row:hover:not(.is-selected) {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.clickable-row.is-selected,
+.clickable-row.is-selected > td {
+  background-color: rgba(21, 101, 192, 0.12) !important;
+  border-left: 3px solid #1565c0;
+}
+
+.clickable-row.is-selected > td {
+  border-left: none;
+}
+
+.clickable-row.is-selected > td:first-child {
+  border-left: 3px solid #1565c0;
+}
