@@ -38,9 +38,6 @@ importers:
       '@tauri-apps/plugin-dialog':
         specifier: ^2.6.0
         version: 2.6.0
-      cytoscape:
-        specifier: ^3.33.2
-        version: 3.33.2
       d3-array:
         specifier: ^3.2.4
         version: 3.2.4
@@ -56,6 +53,9 @@ importers:
       d3-hierarchy:
         specifier: ^3.1.2
         version: 3.1.2
+      d3-quadtree:
+        specifier: ^3.0.1
+        version: 3.0.1
       d3-scale:
         specifier: ^4.0.2
         version: 4.0.2
@@ -114,6 +114,9 @@ importers:
       '@types/d3-hierarchy':
         specifier: ^3.1.7
         version: 3.1.7
+      '@types/d3-quadtree':
+        specifier: ^3.0.6
+        version: 3.0.6
       '@types/d3-scale':
         specifier: ^4.0.9
         version: 4.0.9
@@ -1501,6 +1504,9 @@ packages:
   '@types/d3-path@3.1.1':
     resolution: {integrity: sha512-VMZBYyQvbGmWyWVea0EHs/BwLgxc+MKi1zLDCONksozI4YJMcTt8ZEuIR4Sb1MMTE8MMW49v0IwI5+b7RmfWlg==}
 
+  '@types/d3-quadtree@3.0.6':
+    resolution: {integrity: sha512-oUzyO1/Zm6rsxKRHA1vH0NEDG58HrT5icx/azi9MF1TWdtttWl0UIUsjEQBBh+SIkrpd21ZjEv7ptxWys1ncsg==}
+
   '@types/d3-scale-chromatic@3.1.0':
     resolution: {integrity: sha512-iWMJgwkK7yTRmWqRB5plb1kadXyQ5Sj8V/zYlFGMUBbIPKQScw+Dku9cAAMgJG+z5GYDoMjWGLVOvjghDEFnKQ==}
 
@@ -1765,10 +1771,6 @@ packages:
   cssstyle@6.1.0:
     resolution: {integrity: sha512-Ml4fP2UT2K3CUBQnVlbdV/8aFDdlY69E+YnwJM+3VUWl08S3J8c8aRuJqCkD9Py8DHZ7zNNvsfKl8psocHZEFg==}
     engines: {node: '>=20'}
-
-  cytoscape@3.33.2:
-    resolution: {integrity: sha512-sj4HXd3DokGhzZAdjDejGvTPLqlt84vNFN8m7bGsOzDY5DyVcxIb2ejIXat2Iy7HxWhdT/N1oKyheJ5YdpsGuw==}
-    engines: {node: '>=0.10'}
 
   d3-array@3.2.4:
     resolution: {integrity: sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==}
@@ -4193,6 +4195,8 @@ snapshots:
 
   '@types/d3-path@3.1.1': {}
 
+  '@types/d3-quadtree@3.0.6': {}
+
   '@types/d3-scale-chromatic@3.1.0': {}
 
   '@types/d3-scale@4.0.9':
@@ -4479,8 +4483,6 @@ snapshots:
       '@csstools/css-syntax-patches-for-csstree': 1.0.28
       css-tree: 3.1.0
       lru-cache: 11.2.6
-
-  cytoscape@3.33.2: {}
 
   d3-array@3.2.4:
     dependencies:

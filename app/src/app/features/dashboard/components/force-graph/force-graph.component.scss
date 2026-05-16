@@ -1,0 +1,78 @@
+.graph-card {
+  display: flex;
+  flex-direction: column;
+  height: 600px;
+  background: var(--surface-card, #ffffff);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  padding: 0.75rem;
+  gap: 0.5rem;
+}
+
+.graph-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.legend {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+  background: transparent;
+  border: 1px solid #e0e0e0;
+  border-radius: 999px;
+  color: #424242;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &.is-inactive {
+    opacity: 0.4;
+  }
+}
+
+.legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--chip-color, #666);
+}
+
+.graph-host {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #fafafa;
+}
+
+.graph-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}

@@ -1,0 +1,27 @@
+<div class="graph-card">
+  <div class="graph-toolbar">
+    <div class="legend">
+      <button
+        *ngFor="let cat of categories"
+        type="button"
+        class="legend-chip"
+        [class.is-inactive]="!isCategoryActive(cat.key)"
+        [style.--chip-color]="cat.color"
+        (click)="toggleCategory(cat.key)"
+      >
+        <span class="legend-swatch"></span>
+        {{ cat.label }}
+      </button>
+    </div>
+    <p-button
+      [label]="fisheyeEnabled() ? 'Lente: ativa' : 'Lente: desativada'"
+      icon="pi pi-search-plus"
+      [severity]="fisheyeEnabled() ? 'primary' : 'secondary'"
+      size="small"
+      (onClick)="toggleFisheye()"
+    />
+  </div>
+  <div #host class="graph-host">
+    <canvas #cv class="graph-canvas"></canvas>
+  </div>
+</div>

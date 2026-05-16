@@ -7,8 +7,7 @@ import { AnalysisFacade } from '../../core/state/AnalysisFacade';
 import { RelationCategory } from '../../core/models/types';
 import { SummaryCardsComponent } from './components/summary-cards/summary-cards.component';
 import { ClassTableComponent } from './components/class-table/class-table.component';
-import { DependencyGraphComponent } from './components/dependency-graph/dependency-graph.component';
-import { CouplingRankingComponent } from './components/coupling-ranking/coupling-ranking.component';
+import { ForceGraphComponent } from './components/force-graph/force-graph.component';
 import { MetricsPanelComponent } from './components/metrics-panel/metrics-panel.component';
 import { PackageTreemapComponent } from './components/package-treemap/package-treemap.component';
 import { CoChangeHeatmapComponent } from './components/co-change-heatmap/co-change-heatmap.component';
@@ -23,8 +22,7 @@ import { CoChangeCell } from '../../core/models/CoChangeMatrix';
     CardModule,
     SummaryCardsComponent,
     ClassTableComponent,
-    DependencyGraphComponent,
-    CouplingRankingComponent,
+    ForceGraphComponent,
     MetricsPanelComponent,
     PackageTreemapComponent,
     CoChangeHeatmapComponent,

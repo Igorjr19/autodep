@@ -100,22 +100,29 @@
 
     <div class="grid mb-4">
       <div class="col-12 xl:col-8">
-        <app-dependency-graph
+        <app-force-graph
           [nodes]="data.nodes"
           [edges]="data.edges"
           [activeCategories]="facade.activeCategories()"
           [visibleNodeIds]="facade.visibleNodeIds()"
           (nodeSelected)="facade.selectNode($event)"
           (categoryToggled)="onCategoryToggled($event)"
-        ></app-dependency-graph>
+        ></app-force-graph>
       </div>
       <div class="col-12 xl:col-4">
         <app-metrics-panel
           *ngIf="facade.selectedNode() as selected"
           [node]="selected"
-          class="block mb-3"
         ></app-metrics-panel>
-        <app-coupling-ranking [nodes]="data.nodes"></app-coupling-ranking>
+        <div
+          *ngIf="!facade.selectedNode()"
+          class="surface-card shadow-2 p-4 border-round flex flex-column align-items-center justify-content-center text-center text-500"
+          style="height: 600px"
+        >
+          <i class="pi pi-hand-pointer text-5xl mb-3 opacity-50"></i>
+          <p class="m-0 text-lg">Selecione uma classe no grafo</p>
+          <p class="m-0 mt-1 text-sm">para ver suas métricas detalhadas.</p>
+        </div>
       </div>
     </div>
 
