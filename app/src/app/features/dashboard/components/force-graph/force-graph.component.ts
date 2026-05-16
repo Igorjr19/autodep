@@ -17,6 +17,8 @@ import {
   forceLink,
   forceManyBody,
   forceSimulation,
+  forceX,
+  forceY,
   Simulation,
   SimulationLinkDatum,
   SimulationNodeDatum,
@@ -60,10 +62,35 @@ const MAX_NODE_RADIUS = 22;
 const CBO_RADIUS_DOMAIN = 30;
 const SYNC_TICK_ALPHA_TARGET = 0.02;
 
-const CATEGORIES: ReadonlyArray<RelationCategory> = ['STRUCTURAL', 'BEHAVIORAL', 'LOGICAL'];
+const LINK_DISTANCE = 160;
+const CHARGE_STRENGTH = -620;
+const COLLIDE_PADDING = 6;
+const NODE_HALO_PADDING = 1.5;
+const PACKAGE_CLUSTER_STRENGTH = 0.08;
+const PACKAGE_RING_RATIO = 0.32;
+const ROOT_PACKAGE_LABEL = '(root)';
 
-const EDGE_OPACITY_NO_SELECTION = 0.5;
-const EDGE_OPACITY_BRIGHT = 0.85;
+// Categorias em ordem de prioridade visual (do fundo para a frente).
+// Co-mudança no fundo (mais ruidosa), estruturais por cima (mais informativas).
+const CATEGORY_DRAW_ORDER: ReadonlyArray<RelationCategory> = [
+  'LOGICAL',
+  'BEHAVIORAL',
+  'STRUCTURAL',
+];
+
+const EDGE_BASE_OPACITY: Record<RelationCategory, number> = {
+  STRUCTURAL: 0.55,
+  BEHAVIORAL: 0.4,
+  LOGICAL: 0.12,
+};
+
+const EDGE_LINE_WIDTH: Record<RelationCategory, number> = {
+  STRUCTURAL: 1.0,
+  BEHAVIORAL: 0.9,
+  LOGICAL: 0.7,
+};
+
+const EDGE_OPACITY_BRIGHT = 0.9;
 const EDGE_OPACITY_DIM = 0.04;
 const NODE_OPACITY_DIM = 0.15;
 
@@ -281,6 +308,7 @@ export class ForceGraphComponent implements OnDestroy {
 
     const { width, height } = this.dimensions;
     const rand = mulberry32(SIMULATION_SEED);
+    const packageCenters = this.computePackageCenters(width, height);
 
     const sim = forceSimulation<SimNode, SimLink>(this.simNodes)
       .randomSource(rand)
@@ -288,14 +316,26 @@ export class ForceGraphComponent implements OnDestroy {
         'link',
         forceLink<SimNode, SimLink>(this.simLinks)
           .id((d) => d.id)
-          .distance(120)
-          .strength(0.3),
+          .distance(LINK_DISTANCE)
+          .strength(0.25),
       )
-      .force('charge', forceManyBody<SimNode>().strength(-300))
-      .force('center', forceCenter(width / 2, height / 2))
+      .force('charge', forceManyBody<SimNode>().strength(CHARGE_STRENGTH))
+      .force('center', forceCenter(width / 2, height / 2).strength(0.04))
       .force(
         'collide',
-        forceCollide<SimNode>().radius((d) => d.radius + 2),
+        forceCollide<SimNode>().radius((d) => d.radius + COLLIDE_PADDING),
+      )
+      .force(
+        'x',
+        forceX<SimNode>((d) => packageCenters.get(packageKeyOf(d))?.[0] ?? width / 2).strength(
+          PACKAGE_CLUSTER_STRENGTH,
+        ),
+      )
+      .force(
+        'y',
+        forceY<SimNode>((d) => packageCenters.get(packageKeyOf(d))?.[1] ?? height / 2).strength(
+          PACKAGE_CLUSTER_STRENGTH,
+        ),
       )
       .alphaDecay(0.05)
       .stop();
@@ -312,6 +352,36 @@ export class ForceGraphComponent implements OnDestroy {
     this.buildSpatialIndex();
     this.requestDraw();
     void alphaMin;
+  }
+
+  /**
+   * Distribui os pacotes do projeto em pontos espaçados num anel ao redor do centro.
+   * Cada classe é então puxada (via forceX/forceY) para o ponto do seu pacote,
+   * gerando agrupamentos naturais que reduzem o emaranhado de arestas.
+   */
+  private computePackageCenters(width: number, height: number): Map<string, [number, number]> {
+    const packages = new Set<string>();
+    for (const node of this.simNodes) packages.add(packageKeyOf(node));
+
+    const list = [...packages].sort();
+    const count = list.length;
+    const centers = new Map<string, [number, number]>();
+    if (count === 0) return centers;
+
+    const cx = width / 2;
+    const cy = height / 2;
+    if (count === 1) {
+      centers.set(list[0], [cx, cy]);
+      return centers;
+    }
+
+    const ringRadius = Math.min(width, height) * PACKAGE_RING_RATIO;
+    const step = (2 * Math.PI) / count;
+    for (let i = 0; i < count; i++) {
+      const angle = i * step - Math.PI / 2;
+      centers.set(list[i], [cx + ringRadius * Math.cos(angle), cy + ringRadius * Math.sin(angle)]);
+    }
+    return centers;
   }
 
   private buildSpatialIndex(): void {
@@ -456,23 +526,23 @@ export class ForceGraphComponent implements OnDestroy {
       buckets[link.info.category][isHighlighted ? 'bright' : 'dim'].push(link);
     }
 
-    for (const cat of CATEGORIES) {
+    for (const cat of CATEGORY_DRAW_ORDER) {
       const dim = buckets[cat].dim;
       const bright = buckets[cat].bright;
-      const lineWidth = cat === 'LOGICAL' ? 2 : 1;
+      const lineWidth = EDGE_LINE_WIDTH[cat];
       const dash = edgeDash(cat);
 
       if (dim.length > 0) {
         ctx.strokeStyle = categoryColor[cat];
         ctx.lineWidth = lineWidth;
-        ctx.globalAlpha = hasSelection ? EDGE_OPACITY_DIM : EDGE_OPACITY_NO_SELECTION;
+        ctx.globalAlpha = hasSelection ? EDGE_OPACITY_DIM : EDGE_BASE_OPACITY[cat];
         ctx.setLineDash(dash);
         this.strokeBatch(ctx, dim, useFisheye);
       }
 
       if (bright.length > 0) {
         ctx.strokeStyle = categoryColor[cat];
-        ctx.lineWidth = lineWidth + 0.5;
+        ctx.lineWidth = lineWidth + 0.6;
         ctx.globalAlpha = EDGE_OPACITY_BRIGHT;
         ctx.setLineDash(dash);
         this.strokeBatch(ctx, bright, useFisheye);
@@ -536,6 +606,8 @@ export class ForceGraphComponent implements OnDestroy {
     useFisheye: boolean,
     canBeSelected: boolean,
   ): void {
+    // Pré-calcula posições e raios (usados duas vezes: halo + nó).
+    const projections: Array<{ node: SimNode; x: number; y: number; r: number }> = [];
     for (const node of nodes) {
       let x = node.x ?? 0;
       let y = node.y ?? 0;
@@ -546,12 +618,23 @@ export class ForceGraphComponent implements OnDestroy {
         y = projected.y;
         r = node.radius * projected.z;
       }
+      projections.push({ node, x, y, r });
+    }
 
-      ctx.fillStyle = cboColorScale(node.info.metrics.cbo);
-      const isSelected = canBeSelected && node.id === this.selectedNodeId;
-      ctx.strokeStyle = isSelected ? '#1565c0' : '#cccccc';
+    // Camada 1 — halo branco: oculta arestas que passariam por dentro do nó,
+    // criando separação visual clara entre estrutura do grafo e nós.
+    ctx.fillStyle = '#ffffff';
+    for (const p of projections) {
+      drawNodeShape(ctx, p.node.info.type, p.x, p.y, p.r + NODE_HALO_PADDING, false);
+    }
+
+    // Camada 2 — preenchimento colorido + contorno.
+    for (const p of projections) {
+      ctx.fillStyle = cboColorScale(p.node.info.metrics.cbo);
+      const isSelected = canBeSelected && p.node.id === this.selectedNodeId;
+      ctx.strokeStyle = isSelected ? '#1565c0' : '#9e9e9e';
       ctx.lineWidth = isSelected ? 2 : 1;
-      drawNodeShape(ctx, node.info.type, x, y, r);
+      drawNodeShape(ctx, p.node.info.type, p.x, p.y, p.r, true);
     }
   }
 
@@ -586,6 +669,7 @@ function drawNodeShape(
   x: number,
   y: number,
   r: number,
+  withStroke: boolean,
 ): void {
   ctx.beginPath();
   switch (type) {
@@ -611,10 +695,14 @@ function drawNodeShape(
       break;
   }
   ctx.fill();
-  ctx.stroke();
+  if (withStroke) ctx.stroke();
 }
 
 function lensProject(lens: FisheyeLens, x: number, y: number): [number, number] {
   const p = lens(x, y);
   return [p.x, p.y];
+}
+
+function packageKeyOf(node: SimNode): string {
+  return node.info.packageName === '' ? ROOT_PACKAGE_LABEL : node.info.packageName;
 }
