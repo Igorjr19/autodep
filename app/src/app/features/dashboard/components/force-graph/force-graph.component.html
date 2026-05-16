@@ -23,5 +23,20 @@
   </div>
   <div #host class="graph-host">
     <canvas #cv class="graph-canvas"></canvas>
+    <div
+      *ngIf="hoverTooltip().visible && hoverTooltip().node as n"
+      class="graph-tooltip"
+      [style.left.px]="hoverTooltip().x"
+      [style.top.px]="hoverTooltip().y"
+    >
+      <div class="tooltip-name">{{ n.simpleName }}</div>
+      <div class="tooltip-package">{{ n.packageName || '(root)' }}</div>
+      <div class="tooltip-meta">
+        <span class="tooltip-tag">{{ n.type }}</span>
+        <span class="tooltip-metric">CBO {{ n.metrics.cbo }}</span>
+        <span class="tooltip-metric">LCOM {{ n.metrics.lcom | number: '1.2-2' }}</span>
+        <span class="tooltip-metric">LOC {{ n.metrics.linesOfCode }}</span>
+      </div>
+    </div>
   </div>
 </div>

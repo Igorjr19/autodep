@@ -82,6 +82,12 @@ export class ForceGraphComponent implements OnDestroy {
   canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('cv');
 
   protected readonly fisheyeEnabled = signal(false);
+  protected readonly hoverTooltip = signal<{
+    readonly visible: boolean;
+    readonly x: number;
+    readonly y: number;
+    readonly node: NodeInfo | null;
+  }>({ visible: false, x: 0, y: 0, node: null });
   protected readonly categories: ReadonlyArray<{
     key: RelationCategory;
     label: string;
@@ -294,15 +300,33 @@ export class ForceGraphComponent implements OnDestroy {
   }
 
   private handleMouseMove(event: MouseEvent): void {
-    const rect = this.canvasRef().nativeElement.getBoundingClientRect();
+    const canvas = this.canvasRef().nativeElement;
+    const rect = canvas.getBoundingClientRect();
     this.mouse = [event.clientX - rect.left, event.clientY - rect.top];
     const [wx, wy] = this.screenToWorld(this.mouse[0], this.mouse[1]);
     this.lens.focus([wx, wy]);
+
+    const hovered = this.findNearestNode(wx, wy);
+    if (hovered) {
+      this.hoverTooltip.set({
+        visible: true,
+        x: this.mouse[0] + 14,
+        y: this.mouse[1] + 14,
+        node: hovered.info,
+      });
+      canvas.style.cursor = 'pointer';
+    } else if (this.hoverTooltip().visible) {
+      this.hoverTooltip.set({ visible: false, x: 0, y: 0, node: null });
+      canvas.style.cursor = '';
+    }
+
     if (this.fisheyeEnabled()) this.requestDraw();
   }
 
   private handleMouseLeave(): void {
     this.mouse = null;
+    this.hoverTooltip.set({ visible: false, x: 0, y: 0, node: null });
+    this.canvasRef().nativeElement.style.cursor = '';
     if (this.fisheyeEnabled()) this.requestDraw();
   }
 
