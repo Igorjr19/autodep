@@ -102,6 +102,22 @@
           Exibindo {{ facade.filteredNodes().length }} classes e
           {{ facade.filteredEdges().length }} relações
         </span>
+
+        <p-button
+          icon="pi pi-filter-slash"
+          label="Limpar filtros"
+          severity="secondary"
+          size="small"
+          [text]="true"
+          [disabled]="!facade.hasActiveFilters()"
+          (onClick)="facade.clearFilters()"
+          [title]="
+            facade.hasActiveFilters()
+              ? 'Restaura pacote, acoplamento mínimo e categorias ao padrão'
+              : 'Nenhum filtro ativo'
+          "
+          class="ml-auto"
+        />
       </div>
     </div>
 

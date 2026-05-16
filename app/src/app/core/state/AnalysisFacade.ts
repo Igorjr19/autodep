@@ -134,6 +134,19 @@ export class AnalysisFacade {
     this._minCboFilter.set(value);
   }
 
+  readonly hasActiveFilters = computed(() => {
+    if (this._packageFilter() !== null) return true;
+    if (this._minCboFilter() > 0) return true;
+    if (this._activeCategories().size < 3) return true;
+    return false;
+  });
+
+  clearFilters(): void {
+    this._packageFilter.set(null);
+    this._minCboFilter.set(0);
+    this._activeCategories.set(new Set(['STRUCTURAL', 'BEHAVIORAL', 'LOGICAL']));
+  }
+
   reset(): void {
     this._analysisData.set(null);
     this._selectedPath.set(null);
