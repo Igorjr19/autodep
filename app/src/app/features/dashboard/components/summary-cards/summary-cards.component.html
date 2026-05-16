@@ -3,9 +3,10 @@
   <div class="col-12 md:col-6 lg:col-3">
     <div
       class="surface-card shadow-2 p-3 border-round border-left-3 border-primary flex justify-content-between align-items-center"
+      title="Quantidade total de classes, interfaces, enums e records analisados no projeto"
     >
       <div>
-        <span class="block text-500 font-medium mb-2">Total de Classes</span>
+        <span class="block text-500 font-medium mb-2">Classes analisadas</span>
         <div class="text-900 font-medium text-2xl">{{ summary().totalClasses }}</div>
       </div>
       <div
@@ -20,9 +21,10 @@
   <div class="col-12 md:col-6 lg:col-3">
     <div
       class="surface-card shadow-2 p-3 border-round border-left-3 border-blue-500 flex justify-content-between align-items-center"
+      title="Relações estruturais: herança, implementação de interface, composição, agregação e associação"
     >
       <div>
-        <span class="block text-500 font-medium mb-2">Estruturais</span>
+        <span class="block text-500 font-medium mb-2">Relações estruturais</span>
         <div class="text-900 font-medium text-2xl">{{ summary().structuralRelationships }}</div>
       </div>
       <div
@@ -37,9 +39,10 @@
   <div class="col-12 md:col-6 lg:col-3">
     <div
       class="surface-card shadow-2 p-3 border-round border-left-3 border-orange-500 flex justify-content-between align-items-center"
+      title="Relações comportamentais: chamadas de método, acesso a atributos e referências de tipo"
     >
       <div>
-        <span class="block text-500 font-medium mb-2">Comportamentais</span>
+        <span class="block text-500 font-medium mb-2">Relações comportamentais</span>
         <div class="text-900 font-medium text-2xl">{{ summary().behavioralRelationships }}</div>
       </div>
       <div
@@ -54,9 +57,10 @@
   <div class="col-12 md:col-6 lg:col-3">
     <div
       class="surface-card shadow-2 p-3 border-round border-left-3 border-green-500 flex justify-content-between align-items-center"
+      title="Relações lógicas: classes que historicamente foram modificadas juntas no Git (co-mudança)"
     >
       <div>
-        <span class="block text-500 font-medium mb-2">Lógicas (Co-change)</span>
+        <span class="block text-500 font-medium mb-2">Relações de co-mudança</span>
         <div class="text-900 font-medium text-2xl">{{ summary().logicalRelationships }}</div>
       </div>
       <div
@@ -70,8 +74,11 @@
 
   <!-- Distribuições -->
   <div class="col-12 md:col-6 xl:col-4">
-    <div class="surface-card shadow-2 p-3 border-round">
-      <div class="text-500 font-medium mb-2">CBO — Acoplamento</div>
+    <div class="surface-card shadow-2 p-3 border-round" [title]="defs.cbo.description">
+      <div class="flex justify-content-between align-items-baseline mb-2">
+        <span class="text-700 font-medium">{{ defs.cbo.name }}</span>
+        <span class="text-500 text-xs font-mono">{{ defs.cbo.code }}</span>
+      </div>
       <div class="flex justify-content-between text-sm mb-1">
         <span class="font-bold text-xl" [ngClass]="cboColor(summary().cboDistribution.mean)">
           {{ summary().cboDistribution.mean | number: '1.1-1' }}
@@ -79,16 +86,23 @@
         <span class="text-500">média</span>
       </div>
       <div class="flex gap-3 text-xs text-600">
-        <span>med: {{ summary().cboDistribution.median | number: '1.0-0' }}</span>
-        <span>max: {{ summary().cboDistribution.max | number: '1.0-0' }}</span>
-        <span>dp: {{ summary().cboDistribution.stddev | number: '1.1-1' }}</span>
+        <span title="Mediana"
+          >Mediana: {{ summary().cboDistribution.median | number: '1.0-0' }}</span
+        >
+        <span title="Valor máximo">Máx: {{ summary().cboDistribution.max | number: '1.0-0' }}</span>
+        <span title="Desvio padrão"
+          >Desvio: {{ summary().cboDistribution.stddev | number: '1.1-1' }}</span
+        >
       </div>
     </div>
   </div>
 
   <div class="col-12 md:col-6 xl:col-4">
-    <div class="surface-card shadow-2 p-3 border-round">
-      <div class="text-500 font-medium mb-2">LCOM — Coesão</div>
+    <div class="surface-card shadow-2 p-3 border-round" [title]="defs.lcom.description">
+      <div class="flex justify-content-between align-items-baseline mb-2">
+        <span class="text-700 font-medium">{{ defs.lcom.name }}</span>
+        <span class="text-500 text-xs font-mono">{{ defs.lcom.code }}</span>
+      </div>
       <div class="flex justify-content-between text-sm mb-1">
         <span class="font-bold text-xl" [ngClass]="lcomColor(summary().lcomDistribution.mean)">
           {{ summary().lcomDistribution.mean | number: '1.2-2' }}
@@ -96,16 +110,23 @@
         <span class="text-500">média</span>
       </div>
       <div class="flex gap-3 text-xs text-600">
-        <span>med: {{ summary().lcomDistribution.median | number: '1.2-2' }}</span>
-        <span>max: {{ summary().lcomDistribution.max | number: '1.2-2' }}</span>
-        <span>dp: {{ summary().lcomDistribution.stddev | number: '1.2-2' }}</span>
+        <span title="Mediana"
+          >Mediana: {{ summary().lcomDistribution.median | number: '1.2-2' }}</span
+        >
+        <span title="Valor máximo">Máx: {{ summary().lcomDistribution.max | number: '1.2-2' }}</span>
+        <span title="Desvio padrão"
+          >Desvio: {{ summary().lcomDistribution.stddev | number: '1.2-2' }}</span
+        >
       </div>
     </div>
   </div>
 
   <div class="col-12 md:col-6 xl:col-4">
-    <div class="surface-card shadow-2 p-3 border-round">
-      <div class="text-500 font-medium mb-2">RFC — Resposta</div>
+    <div class="surface-card shadow-2 p-3 border-round" [title]="defs.rfc.description">
+      <div class="flex justify-content-between align-items-baseline mb-2">
+        <span class="text-700 font-medium">{{ defs.rfc.name }}</span>
+        <span class="text-500 text-xs font-mono">{{ defs.rfc.code }}</span>
+      </div>
       <div class="flex justify-content-between text-sm mb-1">
         <span class="font-bold text-xl text-800">
           {{ summary().rfcDistribution.mean | number: '1.1-1' }}
@@ -113,9 +134,13 @@
         <span class="text-500">média</span>
       </div>
       <div class="flex gap-3 text-xs text-600">
-        <span>med: {{ summary().rfcDistribution.median | number: '1.0-0' }}</span>
-        <span>max: {{ summary().rfcDistribution.max | number: '1.0-0' }}</span>
-        <span>dp: {{ summary().rfcDistribution.stddev | number: '1.1-1' }}</span>
+        <span title="Mediana"
+          >Mediana: {{ summary().rfcDistribution.median | number: '1.0-0' }}</span
+        >
+        <span title="Valor máximo">Máx: {{ summary().rfcDistribution.max | number: '1.0-0' }}</span>
+        <span title="Desvio padrão"
+          >Desvio: {{ summary().rfcDistribution.stddev | number: '1.1-1' }}</span
+        >
       </div>
     </div>
   </div>

@@ -15,22 +15,25 @@
           'bg-gray-100 text-gray-700': !node().isInterface && !node().isAbstract
         }"
       >
-        {{ node().type }}
+        {{ typeLabel(node().type) }}
       </span>
       <span
         class="border-round px-2 py-1 text-xs bg-gray-100 text-gray-600 metrics-path"
-        [title]="node().filePath"
+        [title]="'Arquivo fonte: ' + node().filePath"
       >
-        {{ node().filePath }}
+        <i class="pi pi-file text-xs mr-1"></i>{{ node().filePath }}
       </span>
     </div>
   </header>
 
   <section class="metrics-section">
-    <h4 class="metrics-section-title">Acoplamento e coesão</h4>
+    <h4 class="metrics-section-title">Acoplamento e Coesão</h4>
     <div class="grid m-0">
-      <div class="col-6 metric-cell">
-        <div class="metric-label">CBO</div>
+      <div class="col-6 metric-cell" [title]="defs.cbo.description">
+        <div class="metric-label">
+          <span class="metric-full-name">{{ defs.cbo.name }}</span>
+          <span class="metric-code">{{ defs.cbo.code }}</span>
+        </div>
         <div
           class="metric-value"
           [ngClass]="{
@@ -43,8 +46,11 @@
           {{ node().metrics.cbo }}
         </div>
       </div>
-      <div class="col-6 metric-cell">
-        <div class="metric-label">LCOM</div>
+      <div class="col-6 metric-cell" [title]="defs.lcom.description">
+        <div class="metric-label">
+          <span class="metric-full-name">{{ defs.lcom.name }}</span>
+          <span class="metric-code">{{ defs.lcom.code }}</span>
+        </div>
         <div
           class="metric-value"
           [ngClass]="{
@@ -62,34 +68,50 @@
   <section class="metrics-section">
     <h4 class="metrics-section-title">Herança</h4>
     <div class="grid m-0">
-      <div class="col-6 metric-cell">
-        <div class="metric-label">DIT</div>
+      <div class="col-6 metric-cell" [title]="defs.dit.description">
+        <div class="metric-label">
+          <span class="metric-full-name">{{ defs.dit.name }}</span>
+          <span class="metric-code">{{ defs.dit.code }}</span>
+        </div>
         <div class="metric-value text-800">{{ node().metrics.dit }}</div>
       </div>
-      <div class="col-6 metric-cell">
-        <div class="metric-label">NOC</div>
+      <div class="col-6 metric-cell" [title]="defs.noc.description">
+        <div class="metric-label">
+          <span class="metric-full-name">{{ defs.noc.name }}</span>
+          <span class="metric-code">{{ defs.noc.code }}</span>
+        </div>
         <div class="metric-value text-800">{{ node().metrics.noc }}</div>
       </div>
     </div>
   </section>
 
   <section class="metrics-section">
-    <h4 class="metrics-section-title">Tamanho</h4>
+    <h4 class="metrics-section-title">Tamanho e Resposta</h4>
     <div class="grid m-0">
-      <div class="col-6 metric-cell">
-        <div class="metric-label">RFC</div>
+      <div class="col-6 metric-cell" [title]="defs.rfc.description">
+        <div class="metric-label">
+          <span class="metric-full-name">{{ defs.rfc.name }}</span>
+          <span class="metric-code">{{ defs.rfc.code }}</span>
+        </div>
         <div class="metric-value text-800">{{ node().metrics.rfc }}</div>
       </div>
-      <div class="col-6 metric-cell">
-        <div class="metric-label">LOC</div>
+      <div class="col-6 metric-cell" [title]="defs.loc.description">
+        <div class="metric-label">
+          <span class="metric-full-name">{{ defs.loc.name }}</span>
+          <span class="metric-code">{{ defs.loc.code }}</span>
+        </div>
         <div class="metric-value text-800">{{ node().metrics.linesOfCode }}</div>
       </div>
-      <div class="col-6 metric-cell">
-        <div class="metric-label">Métodos</div>
+      <div class="col-6 metric-cell" title="Total de métodos declarados na classe">
+        <div class="metric-label">
+          <span class="metric-full-name">Métodos declarados</span>
+        </div>
         <div class="metric-value-sm text-800">{{ node().metrics.numberOfMethods }}</div>
       </div>
-      <div class="col-6 metric-cell">
-        <div class="metric-label">Atributos</div>
+      <div class="col-6 metric-cell" title="Total de atributos (campos) declarados na classe">
+        <div class="metric-label">
+          <span class="metric-full-name">Atributos</span>
+        </div>
         <div class="metric-value-sm text-800">{{ node().metrics.numberOfAttributes }}</div>
       </div>
     </div>

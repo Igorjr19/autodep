@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SummaryInfo } from '../../../../core/models/SummaryInfo';
+import { METRIC_DEFINITIONS } from '../../../../core/models/metricDefinitions';
 
 @Component({
   selector: 'app-summary-cards',
@@ -11,6 +12,7 @@ import { SummaryInfo } from '../../../../core/models/SummaryInfo';
 })
 export class SummaryCardsComponent {
   summary = input.required<SummaryInfo>();
+  protected readonly defs = METRIC_DEFINITIONS;
 
   cboColor(value: number): string {
     if (value > 10) return 'text-red-600';

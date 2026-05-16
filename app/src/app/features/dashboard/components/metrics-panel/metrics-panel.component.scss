@@ -56,9 +56,27 @@
 }
 
 .metric-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem;
+  margin-bottom: 0.15rem;
+  cursor: help;
+}
+
+.metric-full-name {
   font-size: 0.7rem;
-  color: #757575;
-  margin-bottom: 0.1rem;
+  color: #424242;
+  font-weight: 500;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.metric-code {
+  font-size: 0.6rem;
+  color: #9e9e9e;
+  font-family: 'Roboto Mono', 'Consolas', monospace;
+  flex: 0 0 auto;
 }
 
 .metric-value {

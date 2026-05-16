@@ -7,6 +7,7 @@
         class="legend-chip"
         [class.is-inactive]="!isCategoryActive(cat.key)"
         [style.--chip-color]="cat.color"
+        [title]="cat.tooltip + ' · clique para ocultar/exibir'"
         (click)="toggleCategory(cat.key)"
       >
         <span class="legend-swatch"></span>
@@ -32,10 +33,19 @@
       <div class="tooltip-name">{{ n.simpleName }}</div>
       <div class="tooltip-package">{{ n.packageName || '(root)' }}</div>
       <div class="tooltip-meta">
-        <span class="tooltip-tag">{{ n.type }}</span>
-        <span class="tooltip-metric">CBO {{ n.metrics.cbo }}</span>
-        <span class="tooltip-metric">LCOM {{ n.metrics.lcom | number: '1.2-2' }}</span>
-        <span class="tooltip-metric">LOC {{ n.metrics.linesOfCode }}</span>
+        <span class="tooltip-tag">{{ typeLabel(n.type) }}</span>
+        <span class="tooltip-metric" [title]="defs.cbo.name">
+          <span class="tooltip-metric-label">Acoplamento</span>
+          <span class="tooltip-metric-value">{{ n.metrics.cbo }}</span>
+        </span>
+        <span class="tooltip-metric" [title]="defs.lcom.name">
+          <span class="tooltip-metric-label">Coesão (LCOM)</span>
+          <span class="tooltip-metric-value">{{ n.metrics.lcom | number: '1.2-2' }}</span>
+        </span>
+        <span class="tooltip-metric" [title]="defs.loc.name">
+          <span class="tooltip-metric-label">Linhas</span>
+          <span class="tooltip-metric-value">{{ n.metrics.linesOfCode }}</span>
+        </span>
       </div>
     </div>
   </div>

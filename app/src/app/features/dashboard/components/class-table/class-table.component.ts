@@ -4,6 +4,15 @@ import { NodeInfo } from '../../../../core/models/NodeInfo';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
+import { NodeType } from '../../../../core/models/types';
+import { METRIC_DEFINITIONS } from '../../../../core/models/metricDefinitions';
+
+const TYPE_LABELS: Record<NodeType, string> = {
+  CLASS: 'Classe',
+  INTERFACE: 'Interface',
+  ENUM: 'Enum',
+  RECORD: 'Record',
+};
 
 @Component({
   selector: 'app-class-table',
@@ -14,6 +23,11 @@ import { ButtonModule } from 'primeng/button';
 })
 export class ClassTableComponent {
   nodes = input.required<NodeInfo[]>();
+  protected readonly defs = METRIC_DEFINITIONS;
+
+  protected typeLabel(type: NodeType): string {
+    return TYPE_LABELS[type] ?? type;
+  }
 
   getCboSeverity(cbo: number): 'success' | 'warn' | 'danger' | 'info' {
     if (cbo > 10) return 'danger';

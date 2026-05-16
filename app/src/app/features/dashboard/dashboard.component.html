@@ -63,25 +63,31 @@
     <div class="surface-card shadow-2 p-3 border-round mb-4">
       <div class="flex align-items-center gap-3 flex-wrap">
         <span class="font-medium text-700">
-          <i class="pi pi-filter mr-1"></i> Filtros
+          <i class="pi pi-filter mr-1"></i> Filtros do grafo
         </span>
 
-        <div class="flex align-items-center gap-2">
+        <div
+          class="flex align-items-center gap-2"
+          title="Mostra apenas classes do pacote selecionado"
+        >
           <label class="text-sm text-600">Pacote:</label>
           <select
             class="p-inputtext p-component text-sm"
             [value]="facade.packageFilter() ?? ''"
             (change)="onPackageFilterChange($event)"
           >
-            <option value="">Todos ({{ data.nodes.length }})</option>
+            <option value="">Todos os pacotes ({{ data.nodes.length }} classes)</option>
             <option *ngFor="let pkg of facade.availablePackages()" [value]="pkg">
-              {{ pkg }}
+              {{ pkg || '(root)' }}
             </option>
           </select>
         </div>
 
-        <div class="flex align-items-center gap-2">
-          <label class="text-sm text-600">CBO min:</label>
+        <div
+          class="flex align-items-center gap-2"
+          title="Esconde classes com Acoplamento (CBO) abaixo deste valor"
+        >
+          <label class="text-sm text-600">Acoplamento mínimo (CBO):</label>
           <input
             type="number"
             class="p-inputtext p-component text-sm"
@@ -93,7 +99,8 @@
         </div>
 
         <span class="text-sm text-500">
-          {{ facade.filteredNodes().length }} classes, {{ facade.filteredEdges().length }} relações
+          Exibindo {{ facade.filteredNodes().length }} classes e
+          {{ facade.filteredEdges().length }} relações
         </span>
       </div>
     </div>

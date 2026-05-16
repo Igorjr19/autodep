@@ -27,6 +27,7 @@ import { zoom, zoomIdentity, ZoomTransform } from 'd3-zoom';
 import { NodeInfo } from '../../../../core/models/NodeInfo';
 import { EdgeInfo } from '../../../../core/models/EdgeInfo';
 import { RelationCategory, NodeType } from '../../../../core/models/types';
+import { METRIC_DEFINITIONS } from '../../../../core/models/metricDefinitions';
 import {
   cboColorScale,
   categoryColor,
@@ -34,6 +35,22 @@ import {
   FisheyeLens,
   mulberry32,
 } from '../../../../core/d3';
+
+const TYPE_LABELS: Record<NodeType, string> = {
+  CLASS: 'Classe',
+  INTERFACE: 'Interface',
+  ENUM: 'Enum',
+  RECORD: 'Record',
+};
+
+const CATEGORY_TOOLTIPS: Record<RelationCategory, string> = {
+  STRUCTURAL:
+    'Relações estruturais: herança, implementação de interface, composição, agregação e associação entre classes',
+  BEHAVIORAL:
+    'Relações comportamentais: chamadas de método, acesso a atributos e referências de tipo',
+  LOGICAL:
+    'Relações de co-mudança: classes que historicamente foram modificadas no mesmo commit no Git',
+};
 
 const SIMULATION_SEED = 42;
 const FISHEYE_RADIUS = 200;
@@ -88,15 +105,36 @@ export class ForceGraphComponent implements OnDestroy {
     readonly y: number;
     readonly node: NodeInfo | null;
   }>({ visible: false, x: 0, y: 0, node: null });
+  protected readonly defs = METRIC_DEFINITIONS;
   protected readonly categories: ReadonlyArray<{
     key: RelationCategory;
     label: string;
     color: string;
+    tooltip: string;
   }> = [
-    { key: 'STRUCTURAL', label: 'Estrutural', color: categoryColor.STRUCTURAL },
-    { key: 'BEHAVIORAL', label: 'Comportamental', color: categoryColor.BEHAVIORAL },
-    { key: 'LOGICAL', label: 'Lógica', color: categoryColor.LOGICAL },
+    {
+      key: 'STRUCTURAL',
+      label: 'Estruturais',
+      color: categoryColor.STRUCTURAL,
+      tooltip: CATEGORY_TOOLTIPS.STRUCTURAL,
+    },
+    {
+      key: 'BEHAVIORAL',
+      label: 'Comportamentais',
+      color: categoryColor.BEHAVIORAL,
+      tooltip: CATEGORY_TOOLTIPS.BEHAVIORAL,
+    },
+    {
+      key: 'LOGICAL',
+      label: 'Co-mudança',
+      color: categoryColor.LOGICAL,
+      tooltip: CATEGORY_TOOLTIPS.LOGICAL,
+    },
   ];
+
+  protected typeLabel(type: NodeType): string {
+    return TYPE_LABELS[type] ?? type;
+  }
 
   private simulation: Simulation<SimNode, SimLink> | null = null;
   private simNodes: SimNode[] = [];

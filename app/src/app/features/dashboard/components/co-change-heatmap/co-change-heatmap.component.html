@@ -1,9 +1,12 @@
 <div class="heatmap-container">
   <div class="heatmap-header">
-    <h3 class="m-0 text-lg font-medium">
+    <h3
+      class="m-0 text-lg font-medium"
+      title="Cada célula mostra a intensidade de co-mudança entre dois pacotes (classes que historicamente mudaram juntas no Git). A diagonal representa co-mudanças dentro do mesmo pacote."
+    >
       <i class="pi pi-table mr-2"></i>Co-mudança entre pacotes
     </h3>
-    <span class="text-sm text-500">cor = intensidade · hover para detalhes</span>
+    <span class="text-sm text-500">cor mais escura = mais intenso · hover para detalhes</span>
   </div>
   <div #host class="heatmap-host"></div>
   <div *ngIf="!hasData()" class="heatmap-empty">
@@ -16,7 +19,11 @@
     [style.top.px]="tooltip().y"
   >
     <div class="font-semibold">{{ tooltip().rowPackage }} ↔ {{ tooltip().colPackage }}</div>
-    <div class="text-sm">Peso total: {{ tooltip().totalWeight }}</div>
-    <div class="text-sm">Relações: {{ tooltip().edgeCount }}</div>
+    <div class="text-sm mt-1" title="Soma dos pesos individuais de cada par de classes que mudou junto">
+      Intensidade total: {{ tooltip().totalWeight }}
+    </div>
+    <div class="text-sm" title="Quantidade de pares de classes envolvidos em co-mudanças">
+      Pares de classes: {{ tooltip().edgeCount }}
+    </div>
   </div>
 </div>

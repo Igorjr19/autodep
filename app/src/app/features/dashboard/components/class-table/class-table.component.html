@@ -11,7 +11,7 @@
   >
     <ng-template pTemplate="caption">
       <div class="flex justify-content-between align-items-center">
-        <h3 class="m-0">Detalhes das Classes</h3>
+        <h3 class="m-0">Classes do projeto</h3>
         <div class="flex align-items-center gap-2">
           <span class="p-input-icon-left">
             <i class="pi pi-search"></i>
@@ -19,13 +19,13 @@
               pInputText
               type="text"
               (input)="dt.filterGlobal($event.target.value, 'contains')"
-              placeholder="Buscar..."
+              placeholder="Buscar por nome ou pacote..."
               class="p-inputtext p-component p-element"
             />
           </span>
           <p-button
             icon="pi pi-download"
-            label="CSV"
+            label="Exportar CSV"
             severity="secondary"
             size="small"
             (onClick)="exportCsv()"
@@ -36,30 +36,30 @@
 
     <ng-template pTemplate="header">
       <tr>
-        <th pSortableColumn="simpleName" style="min-width: 10rem">
+        <th pSortableColumn="simpleName" style="min-width: 10rem" title="Nome da classe (sem o pacote)">
           Classe <p-sortIcon field="simpleName"></p-sortIcon>
         </th>
-        <th pSortableColumn="packageName" style="min-width: 12rem">
+        <th pSortableColumn="packageName" style="min-width: 12rem" title="Pacote ao qual a classe pertence">
           Pacote <p-sortIcon field="packageName"></p-sortIcon>
         </th>
-        <th style="width: 5rem">Tipo</th>
-        <th pSortableColumn="metrics.cbo" style="width: 5rem">
-          CBO <p-sortIcon field="metrics.cbo"></p-sortIcon>
+        <th style="width: 6rem" title="Tipo da declaração: classe, interface, enum ou record">Tipo</th>
+        <th pSortableColumn="metrics.cbo" style="width: 5rem" [title]="defs.cbo.name + ' — ' + defs.cbo.description">
+          {{ defs.cbo.code }} <p-sortIcon field="metrics.cbo"></p-sortIcon>
         </th>
-        <th pSortableColumn="metrics.lcom" style="width: 5rem">
-          LCOM <p-sortIcon field="metrics.lcom"></p-sortIcon>
+        <th pSortableColumn="metrics.lcom" style="width: 5rem" [title]="defs.lcom.name + ' — ' + defs.lcom.description">
+          {{ defs.lcom.code }} <p-sortIcon field="metrics.lcom"></p-sortIcon>
         </th>
-        <th pSortableColumn="metrics.dit" style="width: 4rem">
-          DIT <p-sortIcon field="metrics.dit"></p-sortIcon>
+        <th pSortableColumn="metrics.dit" style="width: 4rem" [title]="defs.dit.name + ' — ' + defs.dit.description">
+          {{ defs.dit.code }} <p-sortIcon field="metrics.dit"></p-sortIcon>
         </th>
-        <th pSortableColumn="metrics.noc" style="width: 4rem">
-          NOC <p-sortIcon field="metrics.noc"></p-sortIcon>
+        <th pSortableColumn="metrics.noc" style="width: 4rem" [title]="defs.noc.name + ' — ' + defs.noc.description">
+          {{ defs.noc.code }} <p-sortIcon field="metrics.noc"></p-sortIcon>
         </th>
-        <th pSortableColumn="metrics.rfc" style="width: 5rem">
-          RFC <p-sortIcon field="metrics.rfc"></p-sortIcon>
+        <th pSortableColumn="metrics.rfc" style="width: 5rem" [title]="defs.rfc.name + ' — ' + defs.rfc.description">
+          {{ defs.rfc.code }} <p-sortIcon field="metrics.rfc"></p-sortIcon>
         </th>
-        <th pSortableColumn="metrics.linesOfCode" style="width: 5rem">
-          LOC <p-sortIcon field="metrics.linesOfCode"></p-sortIcon>
+        <th pSortableColumn="metrics.linesOfCode" style="width: 5rem" [title]="defs.loc.name + ' — ' + defs.loc.description">
+          {{ defs.loc.code }} <p-sortIcon field="metrics.linesOfCode"></p-sortIcon>
         </th>
       </tr>
     </ng-template>
@@ -67,10 +67,10 @@
     <ng-template pTemplate="body" let-node>
       <tr>
         <td class="font-medium text-800">{{ node.simpleName }}</td>
-        <td class="text-500 text-sm">{{ node.packageName }}</td>
+        <td class="text-500 text-sm">{{ node.packageName || '(root)' }}</td>
         <td>
           <p-tag
-            [value]="node.type"
+            [value]="typeLabel(node.type)"
             [severity]="
               node.isInterface ? 'info' : node.isAbstract ? 'warn' : node.type === 'ENUM' ? 'contrast' : 'secondary'
             "
