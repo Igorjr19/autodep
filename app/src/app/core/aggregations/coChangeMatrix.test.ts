@@ -14,8 +14,14 @@ function node(id: string, packageName: string): NodeInfo {
     isInterface: false,
     isAbstract: false,
     metrics: {
-      cbo: 0, lcom: 0, dit: 0, noc: 0, rfc: 0,
-      numberOfMethods: 0, numberOfAttributes: 0, linesOfCode: 0,
+      cbo: 0,
+      lcom: 0,
+      dit: 0,
+      noc: 0,
+      rfc: 0,
+      numberOfMethods: 0,
+      numberOfAttributes: 0,
+      linesOfCode: 0,
     },
   };
 }
@@ -73,14 +79,8 @@ describe('buildCoChangeMatrix', () => {
   });
 
   it('aggregates multiple edges between same package pair', () => {
-    const nodes = [
-      node('a.A', 'a'), node('a.B', 'a'),
-      node('b.X', 'b'), node('b.Y', 'b'),
-    ];
-    const edges = [
-      edge('a.A', 'b.X', 'LOGICAL', 0.3),
-      edge('a.B', 'b.Y', 'LOGICAL', 0.5),
-    ];
+    const nodes = [node('a.A', 'a'), node('a.B', 'a'), node('b.X', 'b'), node('b.Y', 'b')];
+    const edges = [edge('a.A', 'b.X', 'LOGICAL', 0.3), edge('a.B', 'b.Y', 'LOGICAL', 0.5)];
     const matrix = buildCoChangeMatrix(nodes, edges);
 
     expect(matrix.cells).toHaveLength(1);
@@ -95,10 +95,7 @@ describe('buildCoChangeMatrix', () => {
 
   it('normalizes pair order (a→b and b→a fold into the same cell)', () => {
     const nodes = [node('a.A', 'a'), node('b.B', 'b')];
-    const edges = [
-      edge('a.A', 'b.B', 'LOGICAL', 0.2),
-      edge('b.B', 'a.A', 'LOGICAL', 0.3),
-    ];
+    const edges = [edge('a.A', 'b.B', 'LOGICAL', 0.2), edge('b.B', 'a.A', 'LOGICAL', 0.3)];
     const matrix = buildCoChangeMatrix(nodes, edges);
 
     expect(matrix.cells).toHaveLength(1);

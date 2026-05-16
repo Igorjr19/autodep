@@ -535,8 +535,7 @@ export class ForceGraphComponent implements OnDestroy {
       if (!visibleIds.has(src.id) || !visibleIds.has(tgt.id)) continue;
       if (!cats.has(link.info.category)) continue;
 
-      const isHighlighted =
-        hasSelection && (src.id === selectedId || tgt.id === selectedId);
+      const isHighlighted = hasSelection && (src.id === selectedId || tgt.id === selectedId);
       buckets[link.info.category][isHighlighted ? 'bright' : 'dim'].push(link);
     }
 
@@ -567,11 +566,7 @@ export class ForceGraphComponent implements OnDestroy {
     ctx.globalAlpha = 1;
   }
 
-  private strokeBatch(
-    ctx: CanvasRenderingContext2D,
-    links: SimLink[],
-    useFisheye: boolean,
-  ): void {
+  private strokeBatch(ctx: CanvasRenderingContext2D, links: SimLink[], useFisheye: boolean): void {
     ctx.beginPath();
     for (const link of links) {
       const src = link.source as SimNode;
@@ -599,8 +594,7 @@ export class ForceGraphComponent implements OnDestroy {
     for (const node of this.simNodes) {
       if (!visibleIds.has(node.id)) continue;
       if (node.x === undefined || node.y === undefined) continue;
-      const isFocus =
-        !hasSelection || node.id === selectedId || this.neighborIds.has(node.id);
+      const isFocus = !hasSelection || node.id === selectedId || this.neighborIds.has(node.id);
       (isFocus ? brightNodes : dimNodes).push(node);
     }
 

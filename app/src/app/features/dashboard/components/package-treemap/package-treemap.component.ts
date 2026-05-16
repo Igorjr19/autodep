@@ -121,11 +121,7 @@ export class PackageTreemapComponent implements OnDestroy {
 
     groups.exit().remove();
 
-    const groupsEnter = groups
-      .enter()
-      .append('g')
-      .attr('class', 'cell')
-      .style('cursor', 'pointer');
+    const groupsEnter = groups.enter().append('g').attr('class', 'cell').style('cursor', 'pointer');
 
     groupsEnter.append('rect');
     groupsEnter.append('text').attr('class', 'cell-label');

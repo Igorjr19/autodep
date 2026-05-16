@@ -12,7 +12,7 @@
         [ngClass]="{
           'bg-blue-100 text-blue-700': node().isInterface,
           'bg-yellow-100 text-yellow-700': node().isAbstract && !node().isInterface,
-          'bg-gray-100 text-gray-700': !node().isInterface && !node().isAbstract
+          'bg-gray-100 text-gray-700': !node().isInterface && !node().isAbstract,
         }"
       >
         {{ typeLabel(node().type) }}
@@ -40,7 +40,7 @@
             'text-green-600': node().metrics.cbo <= 2,
             'text-yellow-600': node().metrics.cbo > 2 && node().metrics.cbo <= 5,
             'text-orange-600': node().metrics.cbo > 5 && node().metrics.cbo <= 10,
-            'text-red-600': node().metrics.cbo > 10
+            'text-red-600': node().metrics.cbo > 10,
           }"
         >
           {{ node().metrics.cbo }}
@@ -56,7 +56,7 @@
           [ngClass]="{
             'text-green-600': node().metrics.lcom <= 0.5,
             'text-orange-600': node().metrics.lcom > 0.5 && node().metrics.lcom <= 0.8,
-            'text-red-600': node().metrics.lcom > 0.8
+            'text-red-600': node().metrics.lcom > 0.8,
           }"
         >
           {{ node().metrics.lcom | number: '1.2-2' }}

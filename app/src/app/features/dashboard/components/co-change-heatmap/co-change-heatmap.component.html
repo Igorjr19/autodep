@@ -19,7 +19,10 @@
     [style.top.px]="tooltip().y"
   >
     <div class="font-semibold">{{ tooltip().rowPackage }} ↔ {{ tooltip().colPackage }}</div>
-    <div class="text-sm mt-1" title="Soma dos pesos individuais de cada par de classes que mudou junto">
+    <div
+      class="text-sm mt-1"
+      title="Soma dos pesos individuais de cada par de classes que mudou junto"
+    >
       Intensidade total: {{ tooltip().totalWeight }}
     </div>
     <div class="text-sm" title="Quantidade de pares de classes envolvidos em co-mudanças">

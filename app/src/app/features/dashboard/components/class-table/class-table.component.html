@@ -36,29 +36,63 @@
 
     <ng-template pTemplate="header">
       <tr>
-        <th pSortableColumn="simpleName" style="min-width: 10rem" title="Nome da classe (sem o pacote)">
+        <th
+          pSortableColumn="simpleName"
+          style="min-width: 10rem"
+          title="Nome da classe (sem o pacote)"
+        >
           Classe <p-sortIcon field="simpleName"></p-sortIcon>
         </th>
-        <th pSortableColumn="packageName" style="min-width: 12rem" title="Pacote ao qual a classe pertence">
+        <th
+          pSortableColumn="packageName"
+          style="min-width: 12rem"
+          title="Pacote ao qual a classe pertence"
+        >
           Pacote <p-sortIcon field="packageName"></p-sortIcon>
         </th>
-        <th style="width: 6rem" title="Tipo da declaração: classe, interface, enum ou record">Tipo</th>
-        <th pSortableColumn="metrics.cbo" style="width: 5rem" [title]="defs.cbo.name + ' — ' + defs.cbo.description">
+        <th style="width: 6rem" title="Tipo da declaração: classe, interface, enum ou record">
+          Tipo
+        </th>
+        <th
+          pSortableColumn="metrics.cbo"
+          style="width: 5rem"
+          [title]="defs.cbo.name + ' — ' + defs.cbo.description"
+        >
           {{ defs.cbo.code }} <p-sortIcon field="metrics.cbo"></p-sortIcon>
         </th>
-        <th pSortableColumn="metrics.lcom" style="width: 5rem" [title]="defs.lcom.name + ' — ' + defs.lcom.description">
+        <th
+          pSortableColumn="metrics.lcom"
+          style="width: 5rem"
+          [title]="defs.lcom.name + ' — ' + defs.lcom.description"
+        >
           {{ defs.lcom.code }} <p-sortIcon field="metrics.lcom"></p-sortIcon>
         </th>
-        <th pSortableColumn="metrics.dit" style="width: 4rem" [title]="defs.dit.name + ' — ' + defs.dit.description">
+        <th
+          pSortableColumn="metrics.dit"
+          style="width: 4rem"
+          [title]="defs.dit.name + ' — ' + defs.dit.description"
+        >
           {{ defs.dit.code }} <p-sortIcon field="metrics.dit"></p-sortIcon>
         </th>
-        <th pSortableColumn="metrics.noc" style="width: 4rem" [title]="defs.noc.name + ' — ' + defs.noc.description">
+        <th
+          pSortableColumn="metrics.noc"
+          style="width: 4rem"
+          [title]="defs.noc.name + ' — ' + defs.noc.description"
+        >
           {{ defs.noc.code }} <p-sortIcon field="metrics.noc"></p-sortIcon>
         </th>
-        <th pSortableColumn="metrics.rfc" style="width: 5rem" [title]="defs.rfc.name + ' — ' + defs.rfc.description">
+        <th
+          pSortableColumn="metrics.rfc"
+          style="width: 5rem"
+          [title]="defs.rfc.name + ' — ' + defs.rfc.description"
+        >
           {{ defs.rfc.code }} <p-sortIcon field="metrics.rfc"></p-sortIcon>
         </th>
-        <th pSortableColumn="metrics.linesOfCode" style="width: 5rem" [title]="defs.loc.name + ' — ' + defs.loc.description">
+        <th
+          pSortableColumn="metrics.linesOfCode"
+          style="width: 5rem"
+          [title]="defs.loc.name + ' — ' + defs.loc.description"
+        >
           {{ defs.loc.code }} <p-sortIcon field="metrics.linesOfCode"></p-sortIcon>
         </th>
       </tr>
@@ -77,12 +111,21 @@
           <p-tag
             [value]="typeLabel(node.type)"
             [severity]="
-              node.isInterface ? 'info' : node.isAbstract ? 'warn' : node.type === 'ENUM' ? 'contrast' : 'secondary'
+              node.isInterface
+                ? 'info'
+                : node.isAbstract
+                  ? 'warn'
+                  : node.type === 'ENUM'
+                    ? 'contrast'
+                    : 'secondary'
             "
           ></p-tag>
         </td>
         <td class="text-center">
-          <p-tag [value]="node.metrics.cbo.toString()" [severity]="getCboSeverity(node.metrics.cbo)"></p-tag>
+          <p-tag
+            [value]="node.metrics.cbo.toString()"
+            [severity]="getCboSeverity(node.metrics.cbo)"
+          ></p-tag>
         </td>
         <td class="text-center">
           <p-tag

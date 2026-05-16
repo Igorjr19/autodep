@@ -64,9 +64,7 @@ export class AnalysisFacade {
     if (!data) return [];
     const ids = this.visibleNodeIds();
     const cats = this._activeCategories();
-    return data.edges.filter(
-      (e) => cats.has(e.category) && ids.has(e.source) && ids.has(e.target),
-    );
+    return data.edges.filter((e) => cats.has(e.category) && ids.has(e.source) && ids.has(e.target));
   });
 
   readonly packageMetrics = computed(() => {

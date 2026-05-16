@@ -35,7 +35,16 @@ describe('aggregatePackageMetrics', () => {
       makeNode({
         id: 'a.B',
         packageName: 'a',
-        metrics: { cbo: 5, lcom: 0.4, dit: 1, noc: 0, rfc: 10, numberOfMethods: 0, numberOfAttributes: 0, linesOfCode: 100 },
+        metrics: {
+          cbo: 5,
+          lcom: 0.4,
+          dit: 1,
+          noc: 0,
+          rfc: 10,
+          numberOfMethods: 0,
+          numberOfAttributes: 0,
+          linesOfCode: 100,
+        },
       }),
     ];
     const result = aggregatePackageMetrics(nodes);
@@ -57,17 +66,44 @@ describe('aggregatePackageMetrics', () => {
       makeNode({
         id: 'a.X',
         packageName: 'a',
-        metrics: { cbo: 4, lcom: 0.2, dit: 1, noc: 0, rfc: 8, numberOfMethods: 0, numberOfAttributes: 0, linesOfCode: 50 },
+        metrics: {
+          cbo: 4,
+          lcom: 0.2,
+          dit: 1,
+          noc: 0,
+          rfc: 8,
+          numberOfMethods: 0,
+          numberOfAttributes: 0,
+          linesOfCode: 50,
+        },
       }),
       makeNode({
         id: 'a.Y',
         packageName: 'a',
-        metrics: { cbo: 6, lcom: 0.4, dit: 2, noc: 0, rfc: 12, numberOfMethods: 0, numberOfAttributes: 0, linesOfCode: 70 },
+        metrics: {
+          cbo: 6,
+          lcom: 0.4,
+          dit: 2,
+          noc: 0,
+          rfc: 12,
+          numberOfMethods: 0,
+          numberOfAttributes: 0,
+          linesOfCode: 70,
+        },
       }),
       makeNode({
         id: 'b.Z',
         packageName: 'b',
-        metrics: { cbo: 1, lcom: 0, dit: 0, noc: 0, rfc: 2, numberOfMethods: 0, numberOfAttributes: 0, linesOfCode: 30 },
+        metrics: {
+          cbo: 1,
+          lcom: 0,
+          dit: 0,
+          noc: 0,
+          rfc: 2,
+          numberOfMethods: 0,
+          numberOfAttributes: 0,
+          linesOfCode: 30,
+        },
       }),
     ];
     const result = aggregatePackageMetrics(nodes);
@@ -92,7 +128,16 @@ describe('aggregatePackageMetrics', () => {
       makeNode({
         id: 'X',
         packageName: '',
-        metrics: { cbo: 0, lcom: 0, dit: 0, noc: 0, rfc: 0, numberOfMethods: 0, numberOfAttributes: 0, linesOfCode: 10 },
+        metrics: {
+          cbo: 0,
+          lcom: 0,
+          dit: 0,
+          noc: 0,
+          rfc: 0,
+          numberOfMethods: 0,
+          numberOfAttributes: 0,
+          linesOfCode: 10,
+        },
       }),
     ];
     const result = aggregatePackageMetrics(nodes);
@@ -103,9 +148,48 @@ describe('aggregatePackageMetrics', () => {
 
   it('orders result by totalLoc descending', () => {
     const nodes = [
-      makeNode({ id: 'small.A', packageName: 'small', metrics: { cbo: 0, lcom: 0, dit: 0, noc: 0, rfc: 0, numberOfMethods: 0, numberOfAttributes: 0, linesOfCode: 10 } }),
-      makeNode({ id: 'big.B', packageName: 'big', metrics: { cbo: 0, lcom: 0, dit: 0, noc: 0, rfc: 0, numberOfMethods: 0, numberOfAttributes: 0, linesOfCode: 500 } }),
-      makeNode({ id: 'mid.C', packageName: 'mid', metrics: { cbo: 0, lcom: 0, dit: 0, noc: 0, rfc: 0, numberOfMethods: 0, numberOfAttributes: 0, linesOfCode: 100 } }),
+      makeNode({
+        id: 'small.A',
+        packageName: 'small',
+        metrics: {
+          cbo: 0,
+          lcom: 0,
+          dit: 0,
+          noc: 0,
+          rfc: 0,
+          numberOfMethods: 0,
+          numberOfAttributes: 0,
+          linesOfCode: 10,
+        },
+      }),
+      makeNode({
+        id: 'big.B',
+        packageName: 'big',
+        metrics: {
+          cbo: 0,
+          lcom: 0,
+          dit: 0,
+          noc: 0,
+          rfc: 0,
+          numberOfMethods: 0,
+          numberOfAttributes: 0,
+          linesOfCode: 500,
+        },
+      }),
+      makeNode({
+        id: 'mid.C',
+        packageName: 'mid',
+        metrics: {
+          cbo: 0,
+          lcom: 0,
+          dit: 0,
+          noc: 0,
+          rfc: 0,
+          numberOfMethods: 0,
+          numberOfAttributes: 0,
+          linesOfCode: 100,
+        },
+      }),
     ];
     const result = aggregatePackageMetrics(nodes);
 

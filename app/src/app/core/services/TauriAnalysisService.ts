@@ -6,7 +6,6 @@ import { AnalysisResult } from '../models/AnalysisResult';
 
 @Injectable({ providedIn: 'root' })
 export class TauriAnalysisService implements AnalysisPort {
-
   private isTauri(): boolean {
     return !!(window as any).__TAURI_INTERNALS__;
   }

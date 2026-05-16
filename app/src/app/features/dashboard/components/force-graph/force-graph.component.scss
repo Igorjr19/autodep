@@ -65,21 +65,9 @@
   border-radius: 4px;
   background-color: #fdfdfd;
   background-image:
-    radial-gradient(
-      circle at 20% 35%,
-      rgba(170, 170, 170, 0.045) 0.5px,
-      transparent 1.2px
-    ),
-    radial-gradient(
-      circle at 75% 65%,
-      rgba(170, 170, 170, 0.04) 0.6px,
-      transparent 1.2px
-    ),
-    radial-gradient(
-      circle at 50% 85%,
-      rgba(180, 180, 180, 0.035) 0.8px,
-      transparent 1.4px
-    ),
+    radial-gradient(circle at 20% 35%, rgba(170, 170, 170, 0.045) 0.5px, transparent 1.2px),
+    radial-gradient(circle at 75% 65%, rgba(170, 170, 170, 0.04) 0.6px, transparent 1.2px),
+    radial-gradient(circle at 50% 85%, rgba(180, 180, 180, 0.035) 0.8px, transparent 1.4px),
     repeating-linear-gradient(
       90deg,
       transparent 0,
