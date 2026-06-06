@@ -2,6 +2,8 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use tauri::path::BaseDirectory;
+use tauri::{AppHandle, Manager};
 
 const BUILD_FILE_NAMES: &[&str] = &[
     "pom.xml",
@@ -19,7 +21,35 @@ const SKIP_DIRS: &[&str] = &[
 const MAX_SCAN_DEPTH: usize = 8;
 const MAX_JAVA_FILES_SAMPLE: usize = 200;
 
-fn get_jar_path() -> PathBuf {
+/// Resolve o executável Java e o JAR da engine.
+///
+/// Em produção (app empacotado) usa o JRE e o JAR incluídos como *resources*;
+/// em desenvolvimento recai para o `java` do sistema e o JAR gerado por
+/// `mvn package` no módulo engine.
+fn resolve_runtime(app: &AppHandle) -> (PathBuf, PathBuf) {
+    let java_rel = if cfg!(target_os = "windows") {
+        "resources/jre/bin/java.exe"
+    } else {
+        "resources/jre/bin/java"
+    };
+
+    let bundled_java = app
+        .path()
+        .resolve(java_rel, BaseDirectory::Resource)
+        .ok()
+        .filter(|p| p.exists());
+    let bundled_jar = app
+        .path()
+        .resolve("resources/engine.jar", BaseDirectory::Resource)
+        .ok()
+        .filter(|p| p.exists());
+
+    let java = bundled_java.unwrap_or_else(|| PathBuf::from("java"));
+    let jar = bundled_jar.unwrap_or_else(dev_jar_path);
+    (java, jar)
+}
+
+fn dev_jar_path() -> PathBuf {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     manifest_dir.join("../../engine/target/structural-1.0-SNAPSHOT-jar-with-dependencies.jar")
 }
@@ -168,8 +198,8 @@ fn validate_java_project(project_path: &str) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn analyze_project(project_path: String) -> Result<String, String> {
-    let jar_path = get_jar_path();
+async fn analyze_project(app: AppHandle, project_path: String) -> Result<String, String> {
+    let (java_path, jar_path) = resolve_runtime(&app);
     if !jar_path.exists() {
         return Err(format!(
             "JAR do motor de análise não encontrado em: {}. Execute 'mvn package' no módulo engine.",
@@ -180,12 +210,12 @@ async fn analyze_project(project_path: String) -> Result<String, String> {
     validate_java_project(&project_path)?;
 
     tauri::async_runtime::spawn_blocking(move || {
-        let output = Command::new("java")
+        let output = Command::new(&java_path)
             .arg("-jar")
             .arg(&jar_path)
             .arg(&project_path)
             .output()
-            .map_err(|e| format!("Falha ao executar o Java: {}. Verifique se o Java está instalado e disponível no PATH.", e))?;
+            .map_err(|e| format!("Falha ao executar o Java ({}): {}. Verifique se o runtime Java está disponível.", java_path.display(), e))?;
 
         if output.status.success() {
             Ok(String::from_utf8_lossy(&output.stdout).to_string())
