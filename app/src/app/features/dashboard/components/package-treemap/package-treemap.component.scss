@@ -12,9 +12,38 @@
 .treemap-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: flex-start;
+  gap: 1rem;
   margin-bottom: 0.5rem;
   flex: 0 0 auto;
+}
+
+.treemap-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  background: transparent;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  color: #424242;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &.is-active {
+    background: var(--primary-color, #1565c0);
+    border-color: var(--primary-color, #1565c0);
+    color: #ffffff;
+  }
 }
 
 .treemap-host {

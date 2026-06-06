@@ -1,26 +1,36 @@
 <div class="treemap-container">
   <div class="treemap-header">
-    <h3
-      class="m-0 text-lg font-medium"
-      title="Cada retângulo é um pacote. Tamanho proporcional ao total de linhas de código; cor indica o acoplamento (CBO) médio do pacote."
+    <div>
+      <h3
+        class="m-0 text-lg font-medium"
+        title="Cada retângulo é um pacote. Tamanho proporcional ao total de linhas de código; cor indica o acoplamento (CBO) médio do pacote."
+      >
+        <i class="pi pi-th-large mr-2"></i>Pacotes por tamanho
+      </h3>
+      <span class="text-sm text-500">
+        tamanho = LOC · cor = acoplamento ·
+        {{ showClasses() ? 'clique numa classe para destacá-la' : 'clique num pacote para filtrar' }}
+      </span>
+    </div>
+    <button
+      type="button"
+      class="treemap-toggle"
+      [class.is-active]="showClasses()"
+      (click)="toggleClasses()"
+      [title]="showClasses() ? 'Voltar a exibir apenas pacotes' : 'Exibir as classes dentro de cada pacote'"
     >
-      <i class="pi pi-th-large mr-2"></i>Pacotes por tamanho
-    </h3>
-    <span class="text-sm text-500">
-      tamanho = LOC total · cor = acoplamento médio · clique para filtrar o grafo
-    </span>
+      <i class="pi" [ngClass]="showClasses() ? 'pi-objects-column' : 'pi-table'"></i>
+      {{ showClasses() ? 'Pacotes' : 'Mostrar classes' }}
+    </button>
   </div>
   <div #host class="treemap-host"></div>
   <div
-    *ngIf="tooltip().visible && tooltip().pkg as p"
+    *ngIf="tooltip().visible"
     class="treemap-tooltip"
     [style.left.px]="tooltip().x"
     [style.top.px]="tooltip().y"
   >
-    <div class="font-semibold">{{ p.name }}</div>
-    <div class="text-sm mt-1">Classes: {{ p.classCount }}</div>
-    <div class="text-sm">Linhas de código (total): {{ p.totalLoc }}</div>
-    <div class="text-sm">Acoplamento (CBO) médio: {{ p.meanCbo }}</div>
-    <div class="text-sm">Coesão (LCOM) média: {{ p.meanLcom }}</div>
+    <div class="font-semibold">{{ tooltip().title }}</div>
+    <div class="text-sm mt-1" *ngFor="let line of tooltip().lines">{{ line }}</div>
   </div>
 </div>
