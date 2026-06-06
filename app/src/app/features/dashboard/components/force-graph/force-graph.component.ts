@@ -30,6 +30,7 @@ import { NodeInfo } from '../../../../core/models/NodeInfo';
 import { EdgeInfo } from '../../../../core/models/EdgeInfo';
 import { RelationCategory, NodeType } from '../../../../core/models/types';
 import { METRIC_DEFINITIONS } from '../../../../core/models/metricDefinitions';
+import { CoChangeFocus } from '../../../../core/state/AnalysisFacade';
 import {
   cboColorScale,
   categoryColor,
@@ -106,6 +107,14 @@ interface SimLink extends SimulationLinkDatum<SimNode> {
   readonly info: EdgeInfo;
 }
 
+/** Estado de realce do grafo (seleção de classe ou foco de co-mudança). */
+interface Emphasis {
+  readonly active: boolean;
+  readonly brightNodes: Set<string>;
+  readonly brightLinks: Set<SimLink>;
+  readonly selectedId: string | null;
+}
+
 @Component({
   selector: 'app-force-graph',
   standalone: true,
@@ -119,6 +128,7 @@ export class ForceGraphComponent implements OnDestroy {
   activeCategories = input.required<Set<RelationCategory>>();
   visibleNodeIds = input.required<Set<string>>();
   selectedNode = input<NodeInfo | null>(null);
+  coChangeFocus = input<CoChangeFocus | null>(null);
 
   nodeSelected = output<NodeInfo | null>();
   categoryToggled = output<RelationCategory>();
@@ -203,6 +213,7 @@ export class ForceGraphComponent implements OnDestroy {
     effect(() => {
       this.visibleNodeIds();
       this.activeCategories();
+      this.coChangeFocus();
       this.requestDraw();
     });
 
@@ -504,15 +515,52 @@ export class ForceGraphComponent implements OnDestroy {
     const visibleIds = this.visibleNodeIds();
     const cats = this.activeCategories();
     const useFisheye = this.fisheyeEnabled() && this.mouse !== null;
-    const selectedId = this.selectedNode()?.id ?? null;
-    const hasSelection = selectedId !== null;
+    const emphasis = this.computeEmphasis();
 
-    this.drawEdges(ctx, visibleIds, cats, useFisheye, hasSelection, selectedId);
-    this.drawNodes(ctx, visibleIds, useFisheye, hasSelection, selectedId);
+    this.drawEdges(ctx, visibleIds, cats, useFisheye, emphasis);
+    this.drawNodes(ctx, visibleIds, useFisheye, emphasis);
 
     ctx.restore();
 
     if (useFisheye) this.drawLensIndicator(ctx);
+  }
+
+  /**
+   * Determina a ênfase visual corrente. Seleção de classe tem prioridade; na
+   * ausência dela, aplica o foco de co-mudança (par de pacotes vindo do heatmap).
+   */
+  private computeEmphasis(): Emphasis {
+    const selectedId = this.selectedNode()?.id ?? null;
+    if (selectedId !== null) {
+      const brightLinks = new Set<SimLink>();
+      for (const link of this.simLinks) {
+        if ((link.source as SimNode).id === selectedId || (link.target as SimNode).id === selectedId) {
+          brightLinks.add(link);
+        }
+      }
+      const brightNodes = new Set<string>([selectedId, ...this.neighborIds]);
+      return { active: true, brightNodes, brightLinks, selectedId };
+    }
+
+    const focus = this.coChangeFocus();
+    if (focus) {
+      const brightLinks = new Set<SimLink>();
+      const brightNodes = new Set<string>();
+      for (const link of this.simLinks) {
+        if (link.info.category !== 'LOGICAL') continue;
+        const sp = packageKeyOf(link.source as SimNode);
+        const tp = packageKeyOf(link.target as SimNode);
+        const matches = (sp === focus.a && tp === focus.b) || (sp === focus.b && tp === focus.a);
+        if (matches) {
+          brightLinks.add(link);
+          brightNodes.add((link.source as SimNode).id);
+          brightNodes.add((link.target as SimNode).id);
+        }
+      }
+      return { active: true, brightNodes, brightLinks, selectedId: null };
+    }
+
+    return { active: false, brightNodes: new Set(), brightLinks: new Set(), selectedId: null };
   }
 
   private drawEdges(
@@ -520,8 +568,7 @@ export class ForceGraphComponent implements OnDestroy {
     visibleIds: Set<string>,
     cats: Set<RelationCategory>,
     useFisheye: boolean,
-    hasSelection: boolean,
-    selectedId: string | null,
+    emphasis: Emphasis,
   ): void {
     const buckets: Record<RelationCategory, { dim: SimLink[]; bright: SimLink[] }> = {
       STRUCTURAL: { dim: [], bright: [] },
@@ -535,7 +582,7 @@ export class ForceGraphComponent implements OnDestroy {
       if (!visibleIds.has(src.id) || !visibleIds.has(tgt.id)) continue;
       if (!cats.has(link.info.category)) continue;
 
-      const isHighlighted = hasSelection && (src.id === selectedId || tgt.id === selectedId);
+      const isHighlighted = emphasis.active && emphasis.brightLinks.has(link);
       buckets[link.info.category][isHighlighted ? 'bright' : 'dim'].push(link);
     }
 
@@ -548,7 +595,7 @@ export class ForceGraphComponent implements OnDestroy {
       if (dim.length > 0) {
         ctx.strokeStyle = categoryColor[cat];
         ctx.lineWidth = lineWidth;
-        ctx.globalAlpha = hasSelection ? EDGE_OPACITY_DIM : EDGE_BASE_OPACITY[cat];
+        ctx.globalAlpha = emphasis.active ? EDGE_OPACITY_DIM : EDGE_BASE_OPACITY[cat];
         ctx.setLineDash(dash);
         this.strokeBatch(ctx, dim, useFisheye);
       }
@@ -585,8 +632,7 @@ export class ForceGraphComponent implements OnDestroy {
     ctx: CanvasRenderingContext2D,
     visibleIds: Set<string>,
     useFisheye: boolean,
-    hasSelection: boolean,
-    selectedId: string | null,
+    emphasis: Emphasis,
   ): void {
     const dimNodes: SimNode[] = [];
     const brightNodes: SimNode[] = [];
@@ -594,17 +640,17 @@ export class ForceGraphComponent implements OnDestroy {
     for (const node of this.simNodes) {
       if (!visibleIds.has(node.id)) continue;
       if (node.x === undefined || node.y === undefined) continue;
-      const isFocus = !hasSelection || node.id === selectedId || this.neighborIds.has(node.id);
+      const isFocus = !emphasis.active || emphasis.brightNodes.has(node.id);
       (isFocus ? brightNodes : dimNodes).push(node);
     }
 
     if (dimNodes.length > 0) {
       ctx.globalAlpha = NODE_OPACITY_DIM;
-      this.paintNodes(ctx, dimNodes, useFisheye, false, selectedId);
+      this.paintNodes(ctx, dimNodes, useFisheye, false, emphasis.selectedId);
     }
 
     ctx.globalAlpha = 1;
-    this.paintNodes(ctx, brightNodes, useFisheye, true, selectedId);
+    this.paintNodes(ctx, brightNodes, useFisheye, true, emphasis.selectedId);
   }
 
   private paintNodes(

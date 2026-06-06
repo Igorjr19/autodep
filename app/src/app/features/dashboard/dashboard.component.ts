@@ -59,9 +59,16 @@ export class DashboardComponent {
   }
 
   onCoChangeCellSelected(cell: CoChangeCell): void {
-    if (cell.rowPackage === cell.colPackage) {
-      this.facade.setPackageFilter(cell.rowPackage);
-    }
+    const packages =
+      cell.rowPackage === cell.colPackage
+        ? [cell.rowPackage]
+        : [cell.rowPackage, cell.colPackage];
+    this.facade.setPackageFilters(packages);
+    this.facade.ensureCategory('LOGICAL');
+    this.facade.setCoChangeFocus({ a: cell.rowPackage, b: cell.colPackage });
+    document
+      .querySelector('app-force-graph')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   exportJson(): void {

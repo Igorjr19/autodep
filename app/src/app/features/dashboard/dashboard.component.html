@@ -73,7 +73,7 @@
           <label class="text-sm text-600">Pacote:</label>
           <select
             class="p-inputtext p-component text-sm"
-            [value]="facade.packageFilter() ?? ''"
+            [value]="facade.packageFilterValue() ?? ''"
             (change)="onPackageFilterChange($event)"
           >
             <option value="">Todos os pacotes ({{ data.nodes.length }} classes)</option>
@@ -129,6 +129,7 @@
           [activeCategories]="facade.activeCategories()"
           [visibleNodeIds]="facade.visibleNodeIds()"
           [selectedNode]="facade.selectedNode()"
+          [coChangeFocus]="facade.coChangeFocus()"
           (nodeSelected)="facade.selectNode($event)"
           (categoryToggled)="onCategoryToggled($event)"
         ></app-force-graph>
@@ -153,8 +154,11 @@
     <div class="grid mb-4">
       <div class="col-12 xl:col-6">
         <app-package-treemap
-          [data]="facade.packageMetrics()"
+          [nodes]="data.nodes"
+          [selectedNodeId]="facade.selectedNode()?.id ?? null"
+          [filteredPackages]="facade.filteredPackages()"
           (packageSelected)="onPackageSelected($event)"
+          (classSelected)="onClassTableSelect($event)"
         ></app-package-treemap>
       </div>
       <div class="col-12 xl:col-6">
