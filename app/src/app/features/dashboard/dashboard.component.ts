@@ -12,6 +12,7 @@ import { MetricsPanelComponent } from './components/metrics-panel/metrics-panel.
 import { PackageTreemapComponent } from './components/package-treemap/package-treemap.component';
 import { CoChangeHeatmapComponent } from './components/co-change-heatmap/co-change-heatmap.component';
 import { CoChangeCell } from '../../core/models/CoChangeMatrix';
+import { NodeInfo } from '../../core/models/NodeInfo';
 
 @Component({
   selector: 'app-dashboard',
@@ -48,10 +49,21 @@ export class DashboardComponent {
   }
 
   onPackageSelected(pkg: string): void {
-    this.facade.setPackageFilter(pkg);
+    const current = this.facade.filteredPackages();
+    // Re-clicar no pacote já filtrado desfaz o filtro (volta à visão completa).
+    if (current.size === 1 && current.has(pkg)) {
+      this.facade.setPackageFilter(null);
+    } else {
+      this.facade.setPackageFilter(pkg);
+    }
   }
 
-  onClassTableSelect(node: import('../../core/models/NodeInfo').NodeInfo): void {
+  onClassTableSelect(node: NodeInfo): void {
+    // Re-clicar na classe já selecionada a desseleciona.
+    if (this.facade.selectedNode()?.id === node.id) {
+      this.facade.selectNode(null);
+      return;
+    }
     this.facade.selectNode(node);
     document
       .querySelector('app-force-graph')
@@ -59,6 +71,14 @@ export class DashboardComponent {
   }
 
   onCoChangeCellSelected(cell: CoChangeCell): void {
+    // Re-clicar na mesma célula desfaz o foco e o filtro (volta à visão completa).
+    const focus = this.facade.coChangeFocus();
+    if (focus && focus.a === cell.rowPackage && focus.b === cell.colPackage) {
+      this.facade.setCoChangeFocus(null);
+      this.facade.setPackageFilter(null);
+      return;
+    }
+
     const packages =
       cell.rowPackage === cell.colPackage
         ? [cell.rowPackage]
