@@ -32,21 +32,27 @@ fn resolve_runtime(app: &AppHandle) -> (PathBuf, PathBuf) {
     } else {
         "resources/jre/bin/java"
     };
+    let jar_rel = "resources/engine.jar";
 
-    let bundled_java = app
-        .path()
-        .resolve(java_rel, BaseDirectory::Resource)
-        .ok()
-        .filter(|p| p.exists());
-    let bundled_jar = app
-        .path()
-        .resolve("resources/engine.jar", BaseDirectory::Resource)
-        .ok()
-        .filter(|p| p.exists());
+    // 1) Resources do app instalado (instalador NSIS).
+    let res_java = app.path().resolve(java_rel, BaseDirectory::Resource).ok();
+    let res_jar = app.path().resolve(jar_rel, BaseDirectory::Resource).ok();
 
-    let java = bundled_java.unwrap_or_else(|| PathBuf::from("java"));
-    let jar = bundled_jar.unwrap_or_else(dev_jar_path);
+    // 2) Ao lado do executável (versão portátil: exe + resources/ na mesma pasta).
+    let exe_dir = std::env::current_exe()
+        .ok()
+        .and_then(|p| p.parent().map(Path::to_path_buf));
+    let exe_java = exe_dir.as_ref().map(|d| d.join(java_rel));
+    let exe_jar = exe_dir.as_ref().map(|d| d.join(jar_rel));
+
+    // 3) Fallback de desenvolvimento: `java` do sistema + JAR do mvn.
+    let java = first_existing([res_java, exe_java]).unwrap_or_else(|| PathBuf::from("java"));
+    let jar = first_existing([res_jar, exe_jar]).unwrap_or_else(dev_jar_path);
     (java, jar)
+}
+
+fn first_existing<const N: usize>(candidates: [Option<PathBuf>; N]) -> Option<PathBuf> {
+    candidates.into_iter().flatten().find(|p| p.exists())
 }
 
 fn dev_jar_path() -> PathBuf {

@@ -62,6 +62,33 @@ O instalador sai em:
 
 ---
 
+## Versão portátil (roda de pendrive, sem instalar)
+
+Plano B caso o antivírus do laboratório barre o instalador. É uma pasta com o
+`.exe` e os recursos lado a lado — o app resolve o JRE/JAR a partir do próprio
+diretório do executável.
+
+- **No CI:** o workflow já gera o artefato **`autodep-windows-portable`**
+  (`AutoDep-portable.zip`) automaticamente.
+- **Local (Windows), após `prepare-bundle.ps1` + `pnpm tauri build`:**
+
+  ```powershell
+  cd app
+  powershell -ExecutionPolicy Bypass -File scripts\make-portable.ps1
+  ```
+
+  Saída: `app\dist-portable\AutoDep-portable.zip`.
+
+Uso no lab: descompacte o zip em qualquer pasta (ou no pendrive) e execute o
+`.exe` que está dentro. **Não precisa instalar nem ter Java.**
+
+> Requer o **WebView2 Runtime**, que já vem pré-instalado no Windows 11 — então
+> nas máquinas do laboratório funciona sem nada extra. (Só o instalador NSIS
+> consegue baixar o WebView2 automaticamente; a versão portátil depende de ele
+> já existir, o que é o caso no Win 11.)
+
+---
+
 ## Implantação no laboratório
 
 - Distribua o `.exe` (pendrive, pasta de rede, etc.). A instalação é por usuário,
