@@ -1,0 +1,62 @@
+name: Build Windows (.exe, todos os usuários)
+
+# Gera o instalador NSIS do AutoDep em modo "perMachine" (todos os usuários).
+# Requer privilégio de administrador para instalar — destinado ao staff do
+# laboratório, que instala uma vez por máquina, com o JRE e a engine no lugar
+# correto (Program Files), evitando o erro de "apenas o executável copiado".
+#
+# Este workflow é INDEPENDENTE do build-windows.yml (que gera o instalador por
+# usuário, sem admin, e a versão portátil).
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*-allusers"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        working-directory: app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 22 (Temurin) — fornece jlink/jdeps
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "22"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "10"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Instalar dependências do frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Preparar bundle (engine.jar + JRE jlink)
+        run: powershell -ExecutionPolicy Bypass -File scripts/prepare-bundle.ps1
+
+      - name: Build Tauri (NSIS, perMachine)
+        run: pnpm tauri build --config src-tauri/tauri.allusers.conf.json
+
+      - name: Publicar instalador (todos os usuários) como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: autodep-windows-installer-allusers
+          path: app/src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: error

@@ -8,8 +8,25 @@ que é necessário** para rodar nas máquinas do laboratório:
 - um **JRE mínimo** gerado com `jlink` — ou seja, **não é preciso instalar Java**
   nas máquinas do laboratório.
 
-O instalador NSIS usa `installMode: currentUser`, então **não exige permissão de
-administrador**.
+---
+
+## Modos de distribuição (qual usar?)
+
+| Modo | Quem instala | Admin? | Quando usar |
+|---|---|---|---|
+| **Instalador todos os usuários** (perMachine) | Staff do laboratório | **Sim** | Instalar uma vez por máquina, em `Program Files`. **Recomendado para o lab.** |
+| **Instalador por usuário** (currentUser) | O próprio participante | Não | Cada um instala no seu perfil, sem depender do TI. |
+| **Portátil (.zip)** | — | Não | Plano B se o instalador for barrado. **Cuidado:** ver aviso abaixo. |
+
+> ⚠️ **Causa do erro no laboratório:** a versão **portátil** só funciona se a
+> pasta `resources/` (que contém o `engine.jar` e o `jre/`) ficar **junto** do
+> executável. Se alguém copia/extrai **apenas o `.exe`**, o app abre mas falha na
+> análise, pois o JRE fica inacessível. Para distribuição em massa, **prefira os
+> instaladores** — eles colocam tudo no lugar automaticamente. O app agora exibe
+> uma mensagem clara ("Instalação incompleta…") quando isso acontece.
+
+Os dois instaladores embutem **tudo** (interface + `engine.jar` + JRE mínimo via
+`jlink`), então **as máquinas não precisam ter Java**.
 
 ---
 
@@ -32,7 +49,23 @@ administrador**.
 
 ## Opção A — Build pelo GitHub Actions (recomendado, sem máquina Windows)
 
-Já existe o workflow `.github/workflows/build-windows.yml`.
+Há **dois** workflows independentes:
+
+| Workflow | Gera | Artefato(s) |
+|---|---|---|
+| `build-windows.yml` | Instalador **por usuário** (sem admin) + **portátil** | `autodep-windows-installer`, `autodep-windows-portable` |
+| `build-windows-allusers.yml` | Instalador **todos os usuários** (perMachine, com admin) | `autodep-windows-installer-allusers` |
+
+Para o laboratório, rode o **`build-windows-allusers.yml`** (Actions → "Build
+Windows (.exe, todos os usuários)" → Run workflow). Para os participantes
+instalarem sozinhos sem admin, use o artefato do `build-windows.yml`.
+
+> O instalador "todos os usuários" é produzido aplicando um override de config
+> (`src-tauri/tauri.allusers.conf.json`) sobre o `tauri.conf.json` base, via
+> `pnpm tauri build --config ...`. O base continua em `currentUser`, então o
+> workflow original não muda.
+
+### Detalhe do workflow original (`build-windows.yml`)
 
 1. Faça push do repositório para o GitHub.
 2. Vá em **Actions → "Build Windows (.exe)" → Run workflow** (ou crie uma tag
@@ -54,7 +87,12 @@ Pré-requisitos: JDK 22+ (com `jlink`/`jdeps`), Maven, Node 20+, pnpm e Rust
 cd app
 pnpm install
 powershell -ExecutionPolicy Bypass -File scripts\prepare-bundle.ps1
+
+# Instalador por usuário (sem admin) — config base:
 pnpm tauri build
+
+# OU instalador para todos os usuários (perMachine, exige admin para instalar):
+pnpm tauri build --config src-tauri\tauri.allusers.conf.json
 ```
 
 O instalador sai em:

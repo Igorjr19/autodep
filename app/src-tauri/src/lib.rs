@@ -13,6 +13,10 @@ const BUILD_FILE_NAMES: &[&str] = &[
     "settings.gradle.kts",
 ];
 
+const INCOMPLETE_INSTALL_MSG: &str = "Instalação incompleta: o motor de análise (engine.jar) e o runtime Java não foram encontrados. \
+Isso normalmente acontece quando apenas o executável é copiado, sem a pasta 'resources'. \
+Reinstale o AutoDep usando o instalador; ou, na versão portátil, mantenha o executável e a pasta 'resources' juntos na mesma pasta.";
+
 const SKIP_DIRS: &[&str] = &[
     "target", "build", "out", "dist", "bin",
     "node_modules", ".git", ".idea", ".gradle", ".mvn",
@@ -206,11 +210,16 @@ fn validate_java_project(project_path: &str) -> Result<(), String> {
 #[tauri::command]
 async fn analyze_project(app: AppHandle, project_path: String) -> Result<String, String> {
     let (java_path, jar_path) = resolve_runtime(&app);
+
+    // Instalação incompleta é a falha mais comum em laboratório: alguém copia
+    // apenas o executável e a pasta "resources" (engine.jar + JRE) fica de fora.
     if !jar_path.exists() {
-        return Err(format!(
-            "JAR do motor de análise não encontrado em: {}. Execute 'mvn package' no módulo engine.",
-            jar_path.display()
-        ));
+        return Err(INCOMPLETE_INSTALL_MSG.to_string());
+    }
+    // O java empacotado é um caminho absoluto; se foi resolvido para um caminho
+    // que não existe, a instalação também está quebrada (JRE ausente).
+    if java_path.is_absolute() && !java_path.exists() {
+        return Err(INCOMPLETE_INSTALL_MSG.to_string());
     }
 
     validate_java_project(&project_path)?;
@@ -221,7 +230,7 @@ async fn analyze_project(app: AppHandle, project_path: String) -> Result<String,
             .arg(&jar_path)
             .arg(&project_path)
             .output()
-            .map_err(|e| format!("Falha ao executar o Java ({}): {}. Verifique se o runtime Java está disponível.", java_path.display(), e))?;
+            .map_err(|_| INCOMPLETE_INSTALL_MSG.to_string())?;
 
         if output.status.success() {
             Ok(String::from_utf8_lossy(&output.stdout).to_string())
